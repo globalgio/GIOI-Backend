@@ -4,7 +4,6 @@ const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes"); // Import user routes
-const formRoutes = require("./routes/formRoutes");
 const cookieParser = require("cookie-parser");
 // Load environment variables
 dotenv.config();
@@ -33,8 +32,8 @@ app.use(bodyParser.json()); // Parses JSON requests
 app.use(bodyParser.urlencoded({ extended: true })); // Parses URL-encoded data
 
 // Define API routes
-app.use("/api/auth", userRoutes); // Use the userRoutes for "/api/users" path
-app.use("/api/forms", formRoutes);
+app.use("/api/gio", userRoutes); // Use the userRoutes for "/api/users" path
+
 // Root route
 app.get("/", (req, res) => {
   res.send("Server is running on port 5001.");
