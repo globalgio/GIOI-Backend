@@ -19,15 +19,16 @@ app.use(helmet()); // Adds security headers
 const corsOptions = {
   origin: "*", // Allow all origins
   methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Allow all methods
-  allowedHeaders: "Content-Type,Authorization", // Specify allowed headers
-  credentials: true, // Allow credentials (optional; set to false if not required)
+  allowedHeaders:
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization", // Allow all headers
+  credentials: true, // Allow credentials
 };
 
 // Apply CORS middleware
 app.use(cors(corsOptions));
 
-// Handle preflight requests
-app.options("*", cors(corsOptions)); // Explicitly handle OPTIONS method // Enable CORS for preflight requests
+// Preflight request handling
+app.options("*", cors(corsOptions));
 
 app.use(cookieParser()); // Enables cookie parsing for authentication tokens
 app.use(bodyParser.json()); // Parses JSON requests
