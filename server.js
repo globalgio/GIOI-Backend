@@ -16,7 +16,7 @@ const PORT = process.env.PORT || 5002;
 
 // Middleware
 app.use(helmet()); // Adds security headers
-const allowedOrigins = ["https://gio.international"]; // Correct origin without trailing slash
+const allowedOrigins = ["*"]; // Correct origin without trailing slash
 
 const corsOptions = {
   origin: (origin, callback) => {
