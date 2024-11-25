@@ -16,19 +16,28 @@ const PORT = process.env.PORT || 5002;
 
 // Middleware
 app.use(helmet()); // Adds security headers
+const allowedOrigins = ["https://gio.international"]; // Correct origin without trailing slash
+
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = ["https://gio.international/"]; // Add allowed origins here
+    // Allow requests if the origin is in the allowed list or if the origin is undefined (e.g., server-to-server requests)
     if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, origin); // Allow if origin is in the list or is undefined (like in server-to-server requests)
+      callback(null, true);
     } else {
-      callback(new Error("Not allowed by CORS")); // Block other origins
+      callback(new Error("Not allowed by CORS"));
     }
   },
-  credentials: true, // Allow cookies
+  credentials: true, // Allow credentials (e.g., cookies, authorization headers)
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Explicitly allow all required methods
+  allowedHeaders: "Content-Type,Authorization", // Specify allowed headers
 };
 
+// Apply CORS middleware
 app.use(cors(corsOptions));
+
+// Handle preflight requests
+app.options("*", cors(corsOptions)); // Enable CORS for preflight requests
+
 app.use(cookieParser()); // Enables cookie parsing for authentication tokens
 app.use(bodyParser.json()); // Parses JSON requests
 app.use(bodyParser.urlencoded({ extended: true })); // Parses URL-encoded data
