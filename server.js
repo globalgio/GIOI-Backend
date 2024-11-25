@@ -4,7 +4,7 @@ const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes"); // Import user routes
-const formRoutes = require("./routes/formRoutes")
+const formRoutes = require("./routes/formRoutes");
 const cookieParser = require("cookie-parser");
 // Load environment variables
 dotenv.config();
@@ -16,12 +16,18 @@ const PORT = process.env.PORT || 5002;
 // Middleware
 app.use(helmet()); // Adds security headers
 const corsOptions = {
-  origin: "https://gio.international/", // Allow requests only from this origin
-  credentials: true, // Allow cookies to be sent
+  origin: (origin, callback) => {
+    const allowedOrigins = ["https://gio.international"]; // Add allowed origins here
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, origin); // Allow if origin is in the list or is undefined (like in server-to-server requests)
+    } else {
+      callback(new Error("Not allowed by CORS")); // Block other origins
+    }
+  },
+  credentials: true, // Allow cookies
 };
 
 app.use(cors(corsOptions));
-
 app.use(cookieParser()); // Enables cookie parsing for authentication tokens
 app.use(bodyParser.json()); // Parses JSON requests
 app.use(bodyParser.urlencoded({ extended: true })); // Parses URL-encoded data
