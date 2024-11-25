@@ -16,6 +16,8 @@
     "express": "^4.21.1",
     "firebase": "^11.0.2",
     "helmet": "^8.0.0",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^6.9.16",
+    "razorpay": "^2.9.5"
   }
 }

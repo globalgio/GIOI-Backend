@@ -5,6 +5,8 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes"); // Import user routes
 const cookieParser = require("cookie-parser");
+
+const razorPayment = require("./routes/razorpayRoutes");
 // Load environment variables
 dotenv.config();
 
@@ -16,7 +18,7 @@ const PORT = process.env.PORT || 5002;
 app.use(helmet()); // Adds security headers
 const corsOptions = {
   origin: (origin, callback) => {
-    const allowedOrigins = ["https://gio.international"]; // Add allowed origins here
+    const allowedOrigins = ["https://gio.international/"]; // Add allowed origins here
     if (allowedOrigins.includes(origin) || !origin) {
       callback(null, origin); // Allow if origin is in the list or is undefined (like in server-to-server requests)
     } else {
@@ -33,13 +35,11 @@ app.use(bodyParser.urlencoded({ extended: true })); // Parses URL-encoded data
 
 // Define API routes
 app.use("/api/gio", userRoutes); // Use the userRoutes for "/api/users" path
-
-// Root route
-app.get("/", (req, res) => {
-  res.send("Server is running on port 5001.");
-});
-
+app.use("/api/payment", razorPayment); // Use the razorPayment
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
+});
+app.get("/", (req, res) => {
+  res.send("Server is running");
 });
