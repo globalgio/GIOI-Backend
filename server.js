@@ -16,27 +16,18 @@ const PORT = process.env.PORT || 5002;
 
 // Middleware
 app.use(helmet()); // Adds security headers
-const allowedOrigins = ["*"]; // Correct origin without trailing slash
-
 const corsOptions = {
-  origin: (origin, callback) => {
-    // Allow requests if the origin is in the allowed list or if the origin is undefined (e.g., server-to-server requests)
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  credentials: true, // Allow credentials (e.g., cookies, authorization headers)
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Explicitly allow all required methods
+  origin: "*", // Allow all origins
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Allow all methods
   allowedHeaders: "Content-Type,Authorization", // Specify allowed headers
+  credentials: true, // Allow credentials (optional; set to false if not required)
 };
 
 // Apply CORS middleware
 app.use(cors(corsOptions));
 
 // Handle preflight requests
-app.options("*", cors(corsOptions)); // Enable CORS for preflight requests
+app.options("*", cors(corsOptions)); // Explicitly handle OPTIONS method // Enable CORS for preflight requests
 
 app.use(cookieParser()); // Enables cookie parsing for authentication tokens
 app.use(bodyParser.json()); // Parses JSON requests
