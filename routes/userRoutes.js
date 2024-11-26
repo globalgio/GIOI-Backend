@@ -3,7 +3,9 @@ const {
   registerUser,
   loginUser,
   getUserProfile,
-  saveQuizMarks
+  saveQuizMarks,
+  getUserRankings,
+  updatePaymentStatus,
 } = require("../controllers/userController");
 const { verifyToken } = require("../middleware/verifyToken");
 
@@ -17,6 +19,14 @@ router.post("/login", loginUser);
 
 // Route to fetch the user's profile data
 router.get("/gio-profile", verifyToken, getUserProfile);
-router.post('/save-quiz-marks', verifyToken, saveQuizMarks);
-// router.post("/reset-password", resetPassword);
+
+// Route to save quiz marks and update rankings
+router.post("/save-quiz-marks", verifyToken, saveQuizMarks);
+
+// Route to update payment or test completion status
+router.patch("/update-payment-status", verifyToken, updatePaymentStatus);
+
+// Route to get user rankings
+router.get("/get-rank", verifyToken, getUserRankings);
+
 module.exports = router;
