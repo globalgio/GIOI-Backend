@@ -20,13 +20,13 @@ router.post("/login", loginUser);
 // Route to fetch the user's profile data
 router.get("/gio-profile", verifyToken, getUserProfile);
 
+// Route to get user rankings
+router.get("/get-rank", verifyToken, getUserRankings);
 // Route to save quiz marks and update rankings
 router.post("/save-quiz-marks", verifyToken, saveQuizMarks);
 
 // Route to update payment or test completion status
 router.patch("/update-payment-status", verifyToken, updatePaymentStatus);
 
-// Route to get user rankings
-router.get("/get-rank", verifyToken, getUserRankings);
 
 module.exports = router;

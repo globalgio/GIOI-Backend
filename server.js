@@ -5,8 +5,9 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes"); // Import user routes
 const cookieParser = require("cookie-parser");
-
+const path = require("path");
 const razorPayment = require("./routes/razorpayRoutes");
+
 // Load environment variables
 dotenv.config();
 
@@ -34,13 +35,20 @@ app.use(cookieParser()); // Enables cookie parsing for authentication tokens
 app.use(bodyParser.json()); // Parses JSON requests
 app.use(bodyParser.urlencoded({ extended: true })); // Parses URL-encoded data
 
+// Serve static files from the public folder
+app.use("/static", express.static(path.join(__dirname, "public")));
+
 // Define API routes
-app.use("/api/gio", userRoutes); // Use the userRoutes for "/api/users" path
+app.use("/api/gio", userRoutes); // Use the userRoutes for "/api/gio" path
 app.use("/api/payment", razorPayment); // Use the razorPayment
+
+// Route to serve JSON files
+
 // Start the server
 app.listen(PORT, () => {
   console.log(`Server is running on http://localhost:${PORT}`);
 });
+
 app.get("/", (req, res) => {
   res.send("Server is running");
 });

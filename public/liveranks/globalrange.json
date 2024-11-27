@@ -1,0 +1,1267 @@
+[
+  { "score": 400, "category": "Gold", "rankRange": "1 to 1250" },
+  { "score": 399, "category": "Gold", "rankRange": "1251 to 2500" },
+  { "score": 398, "category": "Gold", "rankRange": "2501 to 3750" },
+  { "score": 397, "category": "Gold", "rankRange": "3751 to 5000" },
+  { "score": 396, "category": "Gold", "rankRange": "5001 to 6250" },
+  { "score": 395, "category": "Gold", "rankRange": "6251 to 7500" },
+  { "score": 394, "category": "Gold", "rankRange": "7501 to 8750" },
+  { "score": 393, "category": "Gold", "rankRange": "8751 to 10000" },
+  { "score": 392, "category": "Gold", "rankRange": "10001 to 11250" },
+  { "score": 391, "category": "Gold", "rankRange": "11251 to 12500" },
+  { "score": 390, "category": "Gold", "rankRange": "12501 to 13750" },
+  { "score": 389, "category": "Gold", "rankRange": "13751 to 15000" },
+  { "score": 388, "category": "Gold", "rankRange": "15001 to 16250" },
+  { "score": 387, "category": "Gold", "rankRange": "16251 to 17500" },
+  { "score": 386, "category": "Gold", "rankRange": "17501 to 18750" },
+  { "score": 385, "category": "Gold", "rankRange": "18751 to 20000" },
+  { "score": 384, "category": "Gold", "rankRange": "20001 to 21250" },
+  { "score": 383, "category": "Gold", "rankRange": "21251 to 22500" },
+  { "score": 382, "category": "Gold", "rankRange": "22501 to 23750" },
+  { "score": 381, "category": "Gold", "rankRange": "23751 to 25000" },
+  { "score": 380, "category": "Gold", "rankRange": "25001 to 26250" },
+  { "score": 379, "category": "Gold", "rankRange": "26251 to 27500" },
+  { "score": 378, "category": "Gold", "rankRange": "27501 to 28750" },
+  { "score": 377, "category": "Gold", "rankRange": "28751 to 30000" },
+  { "score": 376, "category": "Gold", "rankRange": "30001 to 31250" },
+  { "score": 375, "category": "Gold", "rankRange": "31251 to 32500" },
+  { "score": 374, "category": "Gold", "rankRange": "32501 to 33750" },
+  { "score": 373, "category": "Gold", "rankRange": "33751 to 35000" },
+  { "score": 372, "category": "Gold", "rankRange": "35001 to 36250" },
+  { "score": 371, "category": "Gold", "rankRange": "36251 to 37500" },
+  { "score": 370, "category": "Gold", "rankRange": "37501 to 38750" },
+  { "score": 369, "category": "Gold", "rankRange": "38751 to 40000" },
+  { "score": 368, "category": "Gold", "rankRange": "40001 to 41250" },
+  { "score": 367, "category": "Gold", "rankRange": "41251 to 42500" },
+  { "score": 366, "category": "Gold", "rankRange": "42501 to 43750" },
+  { "score": 365, "category": "Gold", "rankRange": "43751 to 45000" },
+  { "score": 364, "category": "Gold", "rankRange": "45001 to 46250" },
+  { "score": 363, "category": "Gold", "rankRange": "46251 to 47500" },
+  { "score": 362, "category": "Gold", "rankRange": "47501 to 48750" },
+  { "score": 361, "category": "Gold", "rankRange": "48751 to 50000" },
+  { "score": 360, "category": "Gold", "rankRange": "50001 to 51250" },
+  { "score": 359, "category": "Gold", "rankRange": "51251 to 52500" },
+  { "score": 358, "category": "Gold", "rankRange": "52501 to 53750" },
+  { "score": 357, "category": "Gold", "rankRange": "53751 to 55000" },
+  { "score": 356, "category": "Gold", "rankRange": "55001 to 56250" },
+  { "score": 355, "category": "Gold", "rankRange": "56251 to 57500" },
+  { "score": 354, "category": "Gold", "rankRange": "57501 to 58750" },
+  { "score": 353, "category": "Gold", "rankRange": "58751 to 60000" },
+  { "score": 352, "category": "Gold", "rankRange": "60001 to 61250" },
+  { "score": 351, "category": "Gold", "rankRange": "61251 to 62500" },
+  { "score": 350, "category": "Gold", "rankRange": "62501 to 63750" },
+  { "score": 349, "category": "Gold", "rankRange": "63751 to 65000" },
+  { "score": 348, "category": "Gold", "rankRange": "65001 to 66250" },
+  { "score": 347, "category": "Gold", "rankRange": "66251 to 67500" },
+  { "score": 346, "category": "Gold", "rankRange": "67501 to 68750" },
+  { "score": 345, "category": "Gold", "rankRange": "68751 to 70000" },
+  { "score": 344, "category": "Gold", "rankRange": "70001 to 71250" },
+  { "score": 343, "category": "Gold", "rankRange": "71251 to 72500" },
+  { "score": 342, "category": "Gold", "rankRange": "72501 to 73750" },
+  { "score": 341, "category": "Gold", "rankRange": "73751 to 75000" },
+
+  { "score": 340, "category": "Gold", "rankRange": "75001 to 76250" },
+  { "score": 339, "category": "Gold", "rankRange": "76251 to 77500" },
+  { "score": 338, "category": "Gold", "rankRange": "77501 to 78750" },
+  { "score": 337, "category": "Gold", "rankRange": "78751 to 80000" },
+  { "score": 336, "category": "Gold", "rankRange": "80001 to 81250" },
+  { "score": 335, "category": "Gold", "rankRange": "81251 to 82500" },
+  { "score": 334, "category": "Gold", "rankRange": "82501 to 83750" },
+  { "score": 333, "category": "Gold", "rankRange": "83751 to 85000" },
+  { "score": 332, "category": "Gold", "rankRange": "85001 to 86250" },
+  { "score": 331, "category": "Gold", "rankRange": "86251 to 87500" },
+  { "score": 330, "category": "Gold", "rankRange": "87501 to 88750" },
+  { "score": 329, "category": "Gold", "rankRange": "88751 to 90000" },
+  { "score": 328, "category": "Gold", "rankRange": "90001 to 91250" },
+  { "score": 327, "category": "Gold", "rankRange": "91251 to 92500" },
+  { "score": 326, "category": "Gold", "rankRange": "92501 to 93750" },
+  { "score": 325, "category": "Gold", "rankRange": "93751 to 95000" },
+  { "score": 324, "category": "Gold", "rankRange": "95001 to 96250" },
+  { "score": 323, "category": "Gold", "rankRange": "96251 to 97500" },
+  { "score": 322, "category": "Gold", "rankRange": "97501 to 98750" },
+  { "score": 321, "category": "Gold", "rankRange": "98751 to 100000" },
+  { "score": 320, "category": "Gold", "rankRange": "100001 to 101250" },
+  { "score": 319, "category": "Silver", "rankRange": "101251 to 102500" },
+  { "score": 318, "category": "Silver", "rankRange": "102501 to 103750" },
+  { "score": 317, "category": "Silver", "rankRange": "103751 to 105000" },
+  { "score": 316, "category": "Silver", "rankRange": "105001 to 106250" },
+  { "score": 315, "category": "Silver", "rankRange": "106251 to 107500" },
+  { "score": 314, "category": "Silver", "rankRange": "107501 to 108750" },
+  { "score": 313, "category": "Silver", "rankRange": "108751 to 110000" },
+  { "score": 312, "category": "Silver", "rankRange": "110001 to 111250" },
+  { "score": 311, "category": "Silver", "rankRange": "111251 to 112500" },
+  { "score": 310, "category": "Silver", "rankRange": "112501 to 113750" },
+  { "score": 309, "category": "Silver", "rankRange": "113751 to 115000" },
+  { "score": 308, "category": "Silver", "rankRange": "115001 to 116250" },
+  { "score": 307, "category": "Silver", "rankRange": "116251 to 117500" },
+  { "score": 306, "category": "Silver", "rankRange": "117501 to 118750" },
+  { "score": 305, "category": "Silver", "rankRange": "118751 to 120000" },
+  { "score": 304, "category": "Silver", "rankRange": "120001 to 121250" },
+  { "score": 303, "category": "Silver", "rankRange": "121251 to 122500" },
+  { "score": 302, "category": "Silver", "rankRange": "122501 to 123750" },
+  { "score": 301, "category": "Silver", "rankRange": "123751 to 125000" },
+  { "score": 300, "category": "Silver", "rankRange": "125001 to 126250" },
+
+  { "score": 299, "category": "Silver", "rankRange": "126251 to 127500" },
+  { "score": 298, "category": "Silver", "rankRange": "127501 to 128750" },
+  { "score": 297, "category": "Silver", "rankRange": "128751 to 130000" },
+  { "score": 296, "category": "Silver", "rankRange": "130001 to 131250" },
+  { "score": 295, "category": "Silver", "rankRange": "131251 to 132500" },
+  { "score": 294, "category": "Silver", "rankRange": "132501 to 133750" },
+  { "score": 293, "category": "Silver", "rankRange": "133751 to 135000" },
+  { "score": 292, "category": "Silver", "rankRange": "135001 to 136250" },
+  { "score": 291, "category": "Silver", "rankRange": "136251 to 137500" },
+  { "score": 290, "category": "Silver", "rankRange": "137501 to 138750" },
+  { "score": 289, "category": "Silver", "rankRange": "138751 to 140000" },
+  { "score": 288, "category": "Silver", "rankRange": "140001 to 141250" },
+  { "score": 287, "category": "Silver", "rankRange": "141251 to 142500" },
+  { "score": 286, "category": "Silver", "rankRange": "142501 to 143750" },
+  { "score": 285, "category": "Silver", "rankRange": "143751 to 145000" },
+  { "score": 284, "category": "Silver", "rankRange": "145001 to 146250" },
+  { "score": 283, "category": "Silver", "rankRange": "146251 to 147500" },
+  { "score": 282, "category": "Silver", "rankRange": "147501 to 148750" },
+  { "score": 281, "category": "Silver", "rankRange": "148751 to 150000" },
+  { "score": 280, "category": "Silver", "rankRange": "150001 to 151250" },
+  { "score": 279, "category": "Silver", "rankRange": "151251 to 152500" },
+  { "score": 278, "category": "Silver", "rankRange": "152501 to 153750" },
+  { "score": 277, "category": "Silver", "rankRange": "153751 to 155000" },
+  { "score": 276, "category": "Silver", "rankRange": "155001 to 156250" },
+  { "score": 275, "category": "Silver", "rankRange": "156251 to 157500" },
+  { "score": 274, "category": "Silver", "rankRange": "157501 to 158750" },
+  { "score": 273, "category": "Silver", "rankRange": "158751 to 160000" },
+  { "score": 272, "category": "Silver", "rankRange": "160001 to 161250" },
+  { "score": 271, "category": "Silver", "rankRange": "161251 to 162500" },
+  { "score": 270, "category": "Silver", "rankRange": "162501 to 163750" },
+  { "score": 269, "category": "Silver", "rankRange": "163751 to 165000" },
+  { "score": 268, "category": "Silver", "rankRange": "165001 to 166250" },
+  { "score": 267, "category": "Silver", "rankRange": "166251 to 167500" },
+  { "score": 266, "category": "Silver", "rankRange": "167501 to 168750" },
+  { "score": 265, "category": "Silver", "rankRange": "168751 to 170000" },
+  { "score": 264, "category": "Silver", "rankRange": "170001 to 171250" },
+  { "score": 263, "category": "Silver", "rankRange": "171251 to 172500" },
+  { "score": 262, "category": "Silver", "rankRange": "172501 to 173750" },
+  { "score": 261, "category": "Silver", "rankRange": "173751 to 175000" },
+  { "score": 260, "category": "Silver", "rankRange": "175001 to 176250" },
+  { "score": 259, "category": "Silver", "rankRange": "176251 to 177500" },
+  { "score": 258, "category": "Silver", "rankRange": "177501 to 178750" },
+  { "score": 257, "category": "Silver", "rankRange": "178751 to 180000" },
+  { "score": 256, "category": "Silver", "rankRange": "180001 to 181250" },
+  { "score": 255, "category": "Silver", "rankRange": "181251 to 182500" },
+  { "score": 254, "category": "Silver", "rankRange": "182501 to 183750" },
+  { "score": 253, "category": "Silver", "rankRange": "183751 to 185000" },
+  { "score": 252, "category": "Silver", "rankRange": "185001 to 186250" },
+  { "score": 251, "category": "Silver", "rankRange": "186251 to 187500" },
+  { "score": 250, "category": "Silver", "rankRange": "187501 to 188750" },
+  { "score": 249, "category": "Silver", "rankRange": "188751 to 190000" },
+  { "score": 248, "category": "Silver", "rankRange": "190001 to 191250" },
+  { "score": 247, "category": "Silver", "rankRange": "191251 to 192500" },
+  { "score": 246, "category": "Silver", "rankRange": "192501 to 193750" },
+  { "score": 245, "category": "Silver", "rankRange": "193751 to 195000" },
+  { "score": 244, "category": "Silver", "rankRange": "195001 to 196250" },
+  { "score": 243, "category": "Silver", "rankRange": "196251 to 197500" },
+  { "score": 242, "category": "Silver", "rankRange": "197501 to 198750" },
+  { "score": 241, "category": "Silver", "rankRange": "198751 to 200000" },
+  { "score": 240, "category": "Silver", "rankRange": "200001 to 201250" },
+  { "score": 239, "category": "Silver", "rankRange": "201251 to 202500" },
+  { "score": 238, "category": "Silver", "rankRange": "202501 to 203750" },
+  { "score": 237, "category": "Silver", "rankRange": "203751 to 205000" },
+  { "score": 236, "category": "Silver", "rankRange": "205001 to 206250" },
+  { "score": 235, "category": "Silver", "rankRange": "206251 to 207500" },
+  { "score": 234, "category": "Silver", "rankRange": "207501 to 208750" },
+  { "score": 233, "category": "Silver", "rankRange": "208751 to 210000" },
+  { "score": 232, "category": "Silver", "rankRange": "210001 to 211250" },
+  { "score": 231, "category": "Silver", "rankRange": "211251 to 212500" },
+  { "score": 230, "category": "Silver", "rankRange": "212501 to 213750" },
+  { "score": 229, "category": "Silver", "rankRange": "213751 to 215000" },
+  { "score": 228, "category": "Silver", "rankRange": "215001 to 216250" },
+  { "score": 227, "category": "Silver", "rankRange": "216251 to 217500" },
+  { "score": 226, "category": "Silver", "rankRange": "217501 to 218750" },
+  { "score": 225, "category": "Silver", "rankRange": "218751 to 220000" },
+  { "score": 224, "category": "Silver", "rankRange": "220001 to 221250" },
+  { "score": 223, "category": "Silver", "rankRange": "221251 to 222500" },
+  { "score": 222, "category": "Silver", "rankRange": "222501 to 223750" },
+  { "score": 221, "category": "Silver", "rankRange": "223751 to 225000" },
+  { "score": 220, "category": "Silver", "rankRange": "225001 to 226250" },
+  { "score": 219, "category": "Silver", "rankRange": "226251 to 227500" },
+  { "score": 218, "category": "Silver", "rankRange": "227501 to 228750" },
+  { "score": 217, "category": "Silver", "rankRange": "228751 to 230000" },
+  { "score": 216, "category": "Silver", "rankRange": "230001 to 231250" },
+  { "score": 215, "category": "Silver", "rankRange": "231251 to 232500" },
+  { "score": 214, "category": "Silver", "rankRange": "232501 to 233750" },
+  { "score": 213, "category": "Silver", "rankRange": "233751 to 235000" },
+  { "score": 212, "category": "Silver", "rankRange": "235001 to 236250" },
+  { "score": 211, "category": "Silver", "rankRange": "236251 to 237500" },
+  { "score": 210, "category": "Silver", "rankRange": "237501 to 238750" },
+  { "score": 209, "category": "Silver", "rankRange": "238751 to 240000" },
+  { "score": 208, "category": "Silver", "rankRange": "240001 to 241250" },
+  { "score": 207, "category": "Silver", "rankRange": "241251 to 242500" },
+  { "score": 206, "category": "Silver", "rankRange": "242501 to 243750" },
+  { "score": 205, "category": "Silver", "rankRange": "243751 to 245000" },
+  { "score": 204, "category": "Silver", "rankRange": "245001 to 246250" },
+  { "score": 203, "category": "Silver", "rankRange": "246251 to 247500" },
+  { "score": 202, "category": "Silver", "rankRange": "247501 to 248750" },
+  { "score": 201, "category": "Silver", "rankRange": "248751 to 250000" },
+  { "score": 200, "category": "Silver", "rankRange": "250001 to 251250" },
+  { "score": 199, "category": "Bronze", "rankRange": "251251 to 252500" },
+  { "score": 198, "category": "Bronze", "rankRange": "252501 to 253750" },
+  { "score": 197, "category": "Bronze", "rankRange": "253751 to 255000" },
+  { "score": 196, "category": "Bronze", "rankRange": "255001 to 256250" },
+  { "score": 195, "category": "Bronze", "rankRange": "256251 to 257500" },
+  { "score": 194, "category": "Bronze", "rankRange": "257501 to 258750" },
+  { "score": 193, "category": "Bronze", "rankRange": "258751 to 260000" },
+  { "score": 192, "category": "Bronze", "rankRange": "260001 to 261250" },
+  { "score": 191, "category": "Bronze", "rankRange": "261251 to 262500" },
+  { "score": 190, "category": "Bronze", "rankRange": "262501 to 263750" },
+  { "score": 189, "category": "Bronze", "rankRange": "263751 to 265000" },
+  { "score": 188, "category": "Bronze", "rankRange": "265001 to 266250" },
+  { "score": 187, "category": "Bronze", "rankRange": "266251 to 267500" },
+  { "score": 186, "category": "Bronze", "rankRange": "267501 to 268750" },
+  { "score": 185, "category": "Bronze", "rankRange": "268751 to 270000" },
+  { "score": 184, "category": "Bronze", "rankRange": "270001 to 271250" },
+  { "score": 183, "category": "Bronze", "rankRange": "271251 to 272500" },
+  { "score": 182, "category": "Bronze", "rankRange": "272501 to 273750" },
+  { "score": 181, "category": "Bronze", "rankRange": "273751 to 275000" },
+  { "score": 180, "category": "Bronze", "rankRange": "275001 to 276250" },
+  { "score": 179, "category": "Bronze", "rankRange": "276251 to 277500" },
+  { "score": 178, "category": "Bronze", "rankRange": "277501 to 278750" },
+  { "score": 177, "category": "Bronze", "rankRange": "278751 to 280000" },
+  { "score": 176, "category": "Bronze", "rankRange": "280001 to 281250" },
+  { "score": 175, "category": "Bronze", "rankRange": "281251 to 282500" },
+  { "score": 174, "category": "Bronze", "rankRange": "282501 to 283750" },
+  { "score": 173, "category": "Bronze", "rankRange": "283751 to 285000" },
+  { "score": 172, "category": "Bronze", "rankRange": "285001 to 286250" },
+  { "score": 171, "category": "Bronze", "rankRange": "286251 to 287500" },
+  { "score": 170, "category": "Bronze", "rankRange": "287501 to 288750" },
+  { "score": 169, "category": "Bronze", "rankRange": "288751 to 290000" },
+  { "score": 168, "category": "Bronze", "rankRange": "290001 to 291250" },
+  { "score": 167, "category": "Bronze", "rankRange": "291251 to 292500" },
+  { "score": 166, "category": "Bronze", "rankRange": "292501 to 293750" },
+  { "score": 165, "category": "Bronze", "rankRange": "293751 to 295000" },
+  { "score": 164, "category": "Bronze", "rankRange": "295001 to 296250" },
+  { "score": 163, "category": "Bronze", "rankRange": "296251 to 297500" },
+  { "score": 162, "category": "Bronze", "rankRange": "297501 to 298750" },
+  { "score": 161, "category": "Bronze", "rankRange": "298751 to 300000" },
+  { "score": 160, "category": "Bronze", "rankRange": "300001 to 301250" },
+  { "score": 159, "category": "Bronze", "rankRange": "301251 to 302500" },
+  { "score": 158, "category": "Bronze", "rankRange": "302501 to 303750" },
+  { "score": 157, "category": "Bronze", "rankRange": "303751 to 305000" },
+  { "score": 156, "category": "Bronze", "rankRange": "305001 to 306250" },
+  { "score": 155, "category": "Bronze", "rankRange": "306251 to 307500" },
+  { "score": 154, "category": "Bronze", "rankRange": "307501 to 308750" },
+  { "score": 153, "category": "Bronze", "rankRange": "308751 to 310000" },
+  { "score": 152, "category": "Bronze", "rankRange": "310001 to 311250" },
+  { "score": 151, "category": "Bronze", "rankRange": "311251 to 312500" },
+  { "score": 150, "category": "Bronze", "rankRange": "312501 to 313750" },
+  { "score": 149, "category": "Bronze", "rankRange": "313751 to 315000" },
+  { "score": 148, "category": "Bronze", "rankRange": "315001 to 316250" },
+  { "score": 147, "category": "Bronze", "rankRange": "316251 to 317500" },
+  { "score": 146, "category": "Bronze", "rankRange": "317501 to 318750" },
+  { "score": 145, "category": "Bronze", "rankRange": "318751 to 320000" },
+  { "score": 144, "category": "Bronze", "rankRange": "320001 to 321250" },
+  { "score": 143, "category": "Bronze", "rankRange": "321251 to 322500" },
+  { "score": 142, "category": "Bronze", "rankRange": "322501 to 323750" },
+  { "score": 141, "category": "Bronze", "rankRange": "323751 to 325000" },
+  { "score": 140, "category": "Bronze", "rankRange": "325001 to 326250" },
+  { "score": 139, "category": "Bronze", "rankRange": "326251 to 327500" },
+  { "score": 138, "category": "Bronze", "rankRange": "327501 to 328750" },
+  { "score": 137, "category": "Bronze", "rankRange": "328751 to 330000" },
+  { "score": 136, "category": "Bronze", "rankRange": "330001 to 331250" },
+  { "score": 135, "category": "Bronze", "rankRange": "331251 to 332500" },
+  { "score": 134, "category": "Bronze", "rankRange": "332501 to 333750" },
+  { "score": 133, "category": "Bronze", "rankRange": "333751 to 335000" },
+  { "score": 132, "category": "Bronze", "rankRange": "335001 to 336250" },
+  { "score": 131, "category": "Bronze", "rankRange": "336251 to 337500" },
+  { "score": 130, "category": "Bronze", "rankRange": "337501 to 338750" },
+  { "score": 129, "category": "Bronze", "rankRange": "338751 to 340000" },
+  { "score": 128, "category": "Bronze", "rankRange": "340001 to 341250" },
+  { "score": 127, "category": "Bronze", "rankRange": "341251 to 342500" },
+  { "score": 126, "category": "Bronze", "rankRange": "342501 to 343750" },
+  { "score": 125, "category": "Bronze", "rankRange": "343751 to 345000" },
+  { "score": 124, "category": "Bronze", "rankRange": "345001 to 346250" },
+  { "score": 123, "category": "Bronze", "rankRange": "346251 to 347500" },
+  { "score": 122, "category": "Bronze", "rankRange": "347501 to 348750" },
+  { "score": 121, "category": "Bronze", "rankRange": "348751 to 350000" },
+  { "score": 120, "category": "Bronze", "rankRange": "350001 to 351250" },
+  { "score": 119, "category": "Bronze", "rankRange": "351251 to 352500" },
+  { "score": 118, "category": "Bronze", "rankRange": "352501 to 353750" },
+  { "score": 117, "category": "Bronze", "rankRange": "353751 to 355000" },
+  { "score": 116, "category": "Bronze", "rankRange": "355001 to 356250" },
+  { "score": 115, "category": "Bronze", "rankRange": "356251 to 357500" },
+  { "score": 114, "category": "Bronze", "rankRange": "357501 to 358750" },
+  { "score": 113, "category": "Bronze", "rankRange": "358751 to 360000" },
+  { "score": 112, "category": "Bronze", "rankRange": "360001 to 361250" },
+  { "score": 111, "category": "Bronze", "rankRange": "361251 to 362500" },
+  { "score": 110, "category": "Bronze", "rankRange": "362501 to 363750" },
+  { "score": 109, "category": "Bronze", "rankRange": "363751 to 365000" },
+  { "score": 108, "category": "Bronze", "rankRange": "365001 to 366250" },
+  { "score": 107, "category": "Bronze", "rankRange": "366251 to 367500" },
+  { "score": 106, "category": "Bronze", "rankRange": "367501 to 368750" },
+  { "score": 105, "category": "Bronze", "rankRange": "368751 to 370000" },
+  { "score": 104, "category": "Bronze", "rankRange": "370001 to 371250" },
+  { "score": 103, "category": "Bronze", "rankRange": "371251 to 372500" },
+  { "score": 102, "category": "Bronze", "rankRange": "372501 to 373750" },
+  { "score": 101, "category": "Bronze", "rankRange": "373751 to 375000" },
+  { "score": 100, "category": "Bronze", "rankRange": "375001 to 376250" },
+
+  {
+    "score": 99,
+    "category": "Not Applicable",
+    "rankRange": "376251 to 377500"
+  },
+  {
+    "score": 98,
+    "category": "Not Applicable",
+    "rankRange": "377501 to 378750"
+  },
+  {
+    "score": 97,
+    "category": "Not Applicable",
+    "rankRange": "378751 to 380000"
+  },
+  {
+    "score": 96,
+    "category": "Not Applicable",
+    "rankRange": "380001 to 381250"
+  },
+  {
+    "score": 95,
+    "category": "Not Applicable",
+    "rankRange": "381251 to 382500"
+  },
+  {
+    "score": 94,
+    "category": "Not Applicable",
+    "rankRange": "382501 to 383750"
+  },
+  {
+    "score": 93,
+    "category": "Not Applicable",
+    "rankRange": "383751 to 385000"
+  },
+  {
+    "score": 92,
+    "category": "Not Applicable",
+    "rankRange": "385001 to 386250"
+  },
+  {
+    "score": 91,
+    "category": "Not Applicable",
+    "rankRange": "386251 to 387500"
+  },
+  {
+    "score": 90,
+    "category": "Not Applicable",
+    "rankRange": "387501 to 388750"
+  },
+  {
+    "score": 89,
+    "category": "Not Applicable",
+    "rankRange": "388751 to 390000"
+  },
+  {
+    "score": 88,
+    "category": "Not Applicable",
+    "rankRange": "390001 to 391250"
+  },
+  {
+    "score": 87,
+    "category": "Not Applicable",
+    "rankRange": "391251 to 392500"
+  },
+  {
+    "score": 86,
+    "category": "Not Applicable",
+    "rankRange": "392501 to 393750"
+  },
+  {
+    "score": 85,
+    "category": "Not Applicable",
+    "rankRange": "393751 to 395000"
+  },
+  {
+    "score": 84,
+    "category": "Not Applicable",
+    "rankRange": "395001 to 396250"
+  },
+  {
+    "score": 83,
+    "category": "Not Applicable",
+    "rankRange": "396251 to 397500"
+  },
+  {
+    "score": 82,
+    "category": "Not Applicable",
+    "rankRange": "397501 to 398750"
+  },
+  {
+    "score": 81,
+    "category": "Not Applicable",
+    "rankRange": "398751 to 400000"
+  },
+  {
+    "score": 80,
+    "category": "Not Applicable",
+    "rankRange": "400001 to 401250"
+  },
+  {
+    "score": 79,
+    "category": "Not Applicable",
+    "rankRange": "401251 to 402500"
+  },
+  {
+    "score": 78,
+    "category": "Not Applicable",
+    "rankRange": "402501 to 403750"
+  },
+  {
+    "score": 77,
+    "category": "Not Applicable",
+    "rankRange": "403751 to 405000"
+  },
+  {
+    "score": 76,
+    "category": "Not Applicable",
+    "rankRange": "405001 to 406250"
+  },
+  {
+    "score": 75,
+    "category": "Not Applicable",
+    "rankRange": "406251 to 407500"
+  },
+  {
+    "score": 74,
+    "category": "Not Applicable",
+    "rankRange": "407501 to 408750"
+  },
+  {
+    "score": 73,
+    "category": "Not Applicable",
+    "rankRange": "408751 to 410000"
+  },
+  {
+    "score": 72,
+    "category": "Not Applicable",
+    "rankRange": "410001 to 411250"
+  },
+  {
+    "score": 71,
+    "category": "Not Applicable",
+    "rankRange": "411251 to 412500"
+  },
+  {
+    "score": 70,
+    "category": "Not Applicable",
+    "rankRange": "412501 to 413750"
+  },
+  {
+    "score": 69,
+    "category": "Not Applicable",
+    "rankRange": "413751 to 415000"
+  },
+  {
+    "score": 68,
+    "category": "Not Applicable",
+    "rankRange": "415001 to 416250"
+  },
+  {
+    "score": 67,
+    "category": "Not Applicable",
+    "rankRange": "416251 to 417500"
+  },
+  {
+    "score": 66,
+    "category": "Not Applicable",
+    "rankRange": "417501 to 418750"
+  },
+  {
+    "score": 65,
+    "category": "Not Applicable",
+    "rankRange": "418751 to 420000"
+  },
+  {
+    "score": 64,
+    "category": "Not Applicable",
+    "rankRange": "420001 to 421250"
+  },
+  {
+    "score": 63,
+    "category": "Not Applicable",
+    "rankRange": "421251 to 422500"
+  },
+  {
+    "score": 62,
+    "category": "Not Applicable",
+    "rankRange": "422501 to 423750"
+  },
+  {
+    "score": 61,
+    "category": "Not Applicable",
+    "rankRange": "423751 to 425000"
+  },
+  {
+    "score": 60,
+    "category": "Not Applicable",
+    "rankRange": "425001 to 426250"
+  },
+  {
+    "score": 59,
+    "category": "Not Applicable",
+    "rankRange": "426251 to 427500"
+  },
+  {
+    "score": 58,
+    "category": "Not Applicable",
+    "rankRange": "427501 to 428750"
+  },
+  {
+    "score": 57,
+    "category": "Not Applicable",
+    "rankRange": "428751 to 430000"
+  },
+  {
+    "score": 56,
+    "category": "Not Applicable",
+    "rankRange": "430001 to 431250"
+  },
+  {
+    "score": 55,
+    "category": "Not Applicable",
+    "rankRange": "431251 to 432500"
+  },
+  {
+    "score": 54,
+    "category": "Not Applicable",
+    "rankRange": "432501 to 433750"
+  },
+  {
+    "score": 53,
+    "category": "Not Applicable",
+    "rankRange": "433751 to 435000"
+  },
+  {
+    "score": 52,
+    "category": "Not Applicable",
+    "rankRange": "435001 to 436250"
+  },
+  {
+    "score": 51,
+    "category": "Not Applicable",
+    "rankRange": "436251 to 437500"
+  },
+  {
+    "score": 50,
+    "category": "Not Applicable",
+    "rankRange": "437501 to 438750"
+  },
+  {
+    "score": 49,
+    "category": "Not Applicable",
+    "rankRange": "438751 to 440000"
+  },
+  {
+    "score": 48,
+    "category": "Not Applicable",
+    "rankRange": "440001 to 441250"
+  },
+  {
+    "score": 47,
+    "category": "Not Applicable",
+    "rankRange": "441251 to 442500"
+  },
+  {
+    "score": 46,
+    "category": "Not Applicable",
+    "rankRange": "442501 to 443750"
+  },
+  {
+    "score": 45,
+    "category": "Not Applicable",
+    "rankRange": "443751 to 445000"
+  },
+  {
+    "score": 44,
+    "category": "Not Applicable",
+    "rankRange": "445001 to 446250"
+  },
+  {
+    "score": 43,
+    "category": "Not Applicable",
+    "rankRange": "446251 to 447500"
+  },
+  {
+    "score": 42,
+    "category": "Not Applicable",
+    "rankRange": "447501 to 448750"
+  },
+  {
+    "score": 41,
+    "category": "Not Applicable",
+    "rankRange": "448751 to 450000"
+  },
+  {
+    "score": 40,
+    "category": "Not Applicable",
+    "rankRange": "450001 to 451250"
+  },
+  {
+    "score": 39,
+    "category": "Not Applicable",
+    "rankRange": "451251 to 452500"
+  },
+  {
+    "score": 38,
+    "category": "Not Applicable",
+    "rankRange": "452501 to 453750"
+  },
+  {
+    "score": 37,
+    "category": "Not Applicable",
+    "rankRange": "453751 to 455000"
+  },
+
+  {
+    "score": 36,
+    "category": "Not Applicable",
+    "rankRange": "455001 to 456250"
+  },
+  {
+    "score": 35,
+    "category": "Not Applicable",
+    "rankRange": "456251 to 457500"
+  },
+  {
+    "score": 34,
+    "category": "Not Applicable",
+    "rankRange": "457501 to 458750"
+  },
+  {
+    "score": 33,
+    "category": "Not Applicable",
+    "rankRange": "458751 to 460000"
+  },
+  {
+    "score": 32,
+    "category": "Not Applicable",
+    "rankRange": "460001 to 461250"
+  },
+  {
+    "score": 31,
+    "category": "Not Applicable",
+    "rankRange": "461251 to 462500"
+  },
+  {
+    "score": 30,
+    "category": "Not Applicable",
+    "rankRange": "462501 to 463750"
+  },
+  {
+    "score": 29,
+    "category": "Not Applicable",
+    "rankRange": "463751 to 465000"
+  },
+  {
+    "score": 28,
+    "category": "Not Applicable",
+    "rankRange": "465001 to 466250"
+  },
+  {
+    "score": 27,
+    "category": "Not Applicable",
+    "rankRange": "466251 to 467500"
+  },
+  {
+    "score": 26,
+    "category": "Not Applicable",
+    "rankRange": "467501 to 468750"
+  },
+  {
+    "score": 25,
+    "category": "Not Applicable",
+    "rankRange": "468751 to 470000"
+  },
+  {
+    "score": 24,
+    "category": "Not Applicable",
+    "rankRange": "470001 to 471250"
+  },
+  {
+    "score": 23,
+    "category": "Not Applicable",
+    "rankRange": "471251 to 472500"
+  },
+  {
+    "score": 22,
+    "category": "Not Applicable",
+    "rankRange": "472501 to 473750"
+  },
+  {
+    "score": 21,
+    "category": "Not Applicable",
+    "rankRange": "473751 to 475000"
+  },
+  {
+    "score": 20,
+    "category": "Not Applicable",
+    "rankRange": "475001 to 476250"
+  },
+  {
+    "score": 19,
+    "category": "Not Applicable",
+    "rankRange": "476251 to 477500"
+  },
+  {
+    "score": 18,
+    "category": "Not Applicable",
+    "rankRange": "477501 to 478750"
+  },
+  {
+    "score": 17,
+    "category": "Not Applicable",
+    "rankRange": "478751 to 480000"
+  },
+  {
+    "score": 16,
+    "category": "Not Applicable",
+    "rankRange": "480001 to 481250"
+  },
+  {
+    "score": 15,
+    "category": "Not Applicable",
+    "rankRange": "481251 to 482500"
+  },
+  {
+    "score": 14,
+    "category": "Not Applicable",
+    "rankRange": "482501 to 483750"
+  },
+  {
+    "score": 13,
+    "category": "Not Applicable",
+    "rankRange": "483751 to 485000"
+  },
+  {
+    "score": 12,
+    "category": "Not Applicable",
+    "rankRange": "485001 to 486250"
+  },
+  {
+    "score": 11,
+    "category": "Not Applicable",
+    "rankRange": "486251 to 487500"
+  },
+  {
+    "score": 10,
+    "category": "Not Applicable",
+    "rankRange": "487501 to 488750"
+  },
+  { "score": 9, "category": "Not Applicable", "rankRange": "488751 to 490000" },
+  { "score": 8, "category": "Not Applicable", "rankRange": "490001 to 491250" },
+  { "score": 7, "category": "Not Applicable", "rankRange": "491251 to 492500" },
+  { "score": 6, "category": "Not Applicable", "rankRange": "492501 to 493750" },
+  { "score": 5, "category": "Not Applicable", "rankRange": "493751 to 495000" },
+  { "score": 4, "category": "Not Applicable", "rankRange": "495001 to 496250" },
+  { "score": 3, "category": "Not Applicable", "rankRange": "496251 to 497500" },
+  { "score": 2, "category": "Not Applicable", "rankRange": "497501 to 498750" },
+  { "score": 1, "category": "Not Applicable", "rankRange": "498751 to 500000" },
+  { "score": 0, "category": "Not Applicable", "rankRange": "500001 to 501250" },
+  {
+    "score": -1,
+    "category": "Not Applicable",
+    "rankRange": "501251 to 502500"
+  },
+  {
+    "score": -2,
+    "category": "Not Applicable",
+    "rankRange": "502501 to 503750"
+  },
+  {
+    "score": -3,
+    "category": "Not Applicable",
+    "rankRange": "503751 to 505000"
+  },
+  {
+    "score": -4,
+    "category": "Not Applicable",
+    "rankRange": "505001 to 506250"
+  },
+  {
+    "score": -5,
+    "category": "Not Applicable",
+    "rankRange": "506251 to 507500"
+  },
+  {
+    "score": -6,
+    "category": "Not Applicable",
+    "rankRange": "507501 to 508750"
+  },
+  {
+    "score": -7,
+    "category": "Not Applicable",
+    "rankRange": "508751 to 510000"
+  },
+  {
+    "score": -8,
+    "category": "Not Applicable",
+    "rankRange": "510001 to 511250"
+  },
+  {
+    "score": -9,
+    "category": "Not Applicable",
+    "rankRange": "511251 to 512500"
+  },
+  {
+    "score": -10,
+    "category": "Not Applicable",
+    "rankRange": "512501 to 513750"
+  },
+  {
+    "score": -11,
+    "category": "Not Applicable",
+    "rankRange": "513751 to 515000"
+  },
+  {
+    "score": -12,
+    "category": "Not Applicable",
+    "rankRange": "515001 to 516250"
+  },
+  {
+    "score": -13,
+    "category": "Not Applicable",
+    "rankRange": "516251 to 517500"
+  },
+  {
+    "score": -14,
+    "category": "Not Applicable",
+    "rankRange": "517501 to 518750"
+  },
+  {
+    "score": -15,
+    "category": "Not Applicable",
+    "rankRange": "518751 to 520000"
+  },
+  {
+    "score": -16,
+    "category": "Not Applicable",
+    "rankRange": "520001 to 521250"
+  },
+  {
+    "score": -17,
+    "category": "Not Applicable",
+    "rankRange": "521251 to 522500"
+  },
+  {
+    "score": -18,
+    "category": "Not Applicable",
+    "rankRange": "522501 to 523750"
+  },
+  {
+    "score": -19,
+    "category": "Not Applicable",
+    "rankRange": "523751 to 525000"
+  },
+  {
+    "score": -20,
+    "category": "Not Applicable",
+    "rankRange": "525001 to 526250"
+  },
+  {
+    "score": -21,
+    "category": "Not Applicable",
+    "rankRange": "526251 to 527500"
+  },
+  {
+    "score": -22,
+    "category": "Not Applicable",
+    "rankRange": "527501 to 528750"
+  },
+  {
+    "score": -23,
+    "category": "Not Applicable",
+    "rankRange": "528751 to 530000"
+  },
+  {
+    "score": -24,
+    "category": "Not Applicable",
+    "rankRange": "530001 to 531250"
+  },
+  {
+    "score": -25,
+    "category": "Not Applicable",
+    "rankRange": "531251 to 532500"
+  },
+  {
+    "score": -26,
+    "category": "Not Applicable",
+    "rankRange": "532501 to 533750"
+  },
+  {
+    "score": -27,
+    "category": "Not Applicable",
+    "rankRange": "533751 to 535000"
+  },
+  {
+    "score": -28,
+    "category": "Not Applicable",
+    "rankRange": "535001 to 536250"
+  },
+  {
+    "score": -29,
+    "category": "Not Applicable",
+    "rankRange": "536251 to 537500"
+  },
+  {
+    "score": -30,
+    "category": "Not Applicable",
+    "rankRange": "537501 to 538750"
+  },
+  {
+    "score": -31,
+    "category": "Not Applicable",
+    "rankRange": "538751 to 540000"
+  },
+  {
+    "score": -32,
+    "category": "Not Applicable",
+    "rankRange": "540001 to 541250"
+  },
+  {
+    "score": -33,
+    "category": "Not Applicable",
+    "rankRange": "541251 to 542500"
+  },
+  {
+    "score": -34,
+    "category": "Not Applicable",
+    "rankRange": "542501 to 543750"
+  },
+  {
+    "score": -35,
+    "category": "Not Applicable",
+    "rankRange": "543751 to 545000"
+  },
+  {
+    "score": -36,
+    "category": "Not Applicable",
+    "rankRange": "545001 to 546250"
+  },
+  {
+    "score": -37,
+    "category": "Not Applicable",
+    "rankRange": "546251 to 547500"
+  },
+  {
+    "score": -38,
+    "category": "Not Applicable",
+    "rankRange": "547501 to 548750"
+  },
+  {
+    "score": -39,
+    "category": "Not Applicable",
+    "rankRange": "548751 to 550000"
+  },
+  {
+    "score": -40,
+    "category": "Not Applicable",
+    "rankRange": "550001 to 551250"
+  },
+  {
+    "score": -41,
+    "category": "Not Applicable",
+    "rankRange": "551251 to 552500"
+  },
+  {
+    "score": -42,
+    "category": "Not Applicable",
+    "rankRange": "552501 to 553750"
+  },
+  {
+    "score": -43,
+    "category": "Not Applicable",
+    "rankRange": "553751 to 555000"
+  },
+  {
+    "score": -44,
+    "category": "Not Applicable",
+    "rankRange": "555001 to 556250"
+  },
+  {
+    "score": -45,
+    "category": "Not Applicable",
+    "rankRange": "556251 to 557500"
+  },
+  {
+    "score": -46,
+    "category": "Not Applicable",
+    "rankRange": "557501 to 558750"
+  },
+  {
+    "score": -47,
+    "category": "Not Applicable",
+    "rankRange": "558751 to 560000"
+  },
+  {
+    "score": -48,
+    "category": "Not Applicable",
+    "rankRange": "560001 to 561250"
+  },
+  {
+    "score": -49,
+    "category": "Not Applicable",
+    "rankRange": "561251 to 562500"
+  },
+  {
+    "score": -50,
+    "category": "Not Applicable",
+    "rankRange": "562501 to 563750"
+  },
+  {
+    "score": -51,
+    "category": "Not Applicable",
+    "rankRange": "563751 to 565000"
+  },
+  {
+    "score": -52,
+    "category": "Not Applicable",
+    "rankRange": "565001 to 566250"
+  },
+  {
+    "score": -53,
+    "category": "Not Applicable",
+    "rankRange": "566251 to 567500"
+  },
+  {
+    "score": -54,
+    "category": "Not Applicable",
+    "rankRange": "567501 to 568750"
+  },
+  {
+    "score": -55,
+    "category": "Not Applicable",
+    "rankRange": "568751 to 570000"
+  },
+  {
+    "score": -56,
+    "category": "Not Applicable",
+    "rankRange": "570001 to 571250"
+  },
+  {
+    "score": -57,
+    "category": "Not Applicable",
+    "rankRange": "571251 to 572500"
+  },
+  {
+    "score": -58,
+    "category": "Not Applicable",
+    "rankRange": "572501 to 573750"
+  },
+  {
+    "score": -59,
+    "category": "Not Applicable",
+    "rankRange": "573751 to 575000"
+  },
+  {
+    "score": -60,
+    "category": "Not Applicable",
+    "rankRange": "575001 to 576250"
+  },
+  {
+    "score": -61,
+    "category": "Not Applicable",
+    "rankRange": "576251 to 577500"
+  },
+  {
+    "score": -62,
+    "category": "Not Applicable",
+    "rankRange": "577501 to 578750"
+  },
+  {
+    "score": -63,
+    "category": "Not Applicable",
+    "rankRange": "578751 to 580000"
+  },
+  {
+    "score": -64,
+    "category": "Not Applicable",
+    "rankRange": "580001 to 581250"
+  },
+  {
+    "score": -65,
+    "category": "Not Applicable",
+    "rankRange": "581251 to 582500"
+  },
+  {
+    "score": -66,
+    "category": "Not Applicable",
+    "rankRange": "582501 to 583750"
+  },
+  {
+    "score": -67,
+    "category": "Not Applicable",
+    "rankRange": "583751 to 585000"
+  },
+  {
+    "score": -68,
+    "category": "Not Applicable",
+    "rankRange": "585001 to 586250"
+  },
+  {
+    "score": -69,
+    "category": "Not Applicable",
+    "rankRange": "586251 to 587500"
+  },
+  {
+    "score": -70,
+    "category": "Not Applicable",
+    "rankRange": "587501 to 588750"
+  },
+  {
+    "score": -71,
+    "category": "Not Applicable",
+    "rankRange": "588751 to 590000"
+  },
+  {
+    "score": -72,
+    "category": "Not Applicable",
+    "rankRange": "590001 to 591250"
+  },
+  {
+    "score": -73,
+    "category": "Not Applicable",
+    "rankRange": "591251 to 592500"
+  },
+  {
+    "score": -74,
+    "category": "Not Applicable",
+    "rankRange": "592501 to 593750"
+  },
+  {
+    "score": -75,
+    "category": "Not Applicable",
+    "rankRange": "593751 to 595000"
+  },
+  {
+    "score": -76,
+    "category": "Not Applicable",
+    "rankRange": "595001 to 596250"
+  },
+  {
+    "score": -77,
+    "category": "Not Applicable",
+    "rankRange": "596251 to 597500"
+  },
+  {
+    "score": -78,
+    "category": "Not Applicable",
+    "rankRange": "597501 to 598750"
+  },
+  {
+    "score": -79,
+    "category": "Not Applicable",
+    "rankRange": "598751 to 600000"
+  },
+  {
+    "score": -80,
+    "category": "Not Applicable",
+    "rankRange": "600001 to 601250"
+  },
+  {
+    "score": -81,
+    "category": "Not Applicable",
+    "rankRange": "601251 to 602500"
+  },
+  {
+    "score": -82,
+    "category": "Not Applicable",
+    "rankRange": "602501 to 603750"
+  },
+  {
+    "score": -83,
+    "category": "Not Applicable",
+    "rankRange": "603751 to 605000"
+  },
+  {
+    "score": -84,
+    "category": "Not Applicable",
+    "rankRange": "605001 to 606250"
+  },
+  {
+    "score": -85,
+    "category": "Not Applicable",
+    "rankRange": "606251 to 607500"
+  },
+  {
+    "score": -86,
+    "category": "Not Applicable",
+    "rankRange": "607501 to 608750"
+  },
+  {
+    "score": -87,
+    "category": "Not Applicable",
+    "rankRange": "608751 to 610000"
+  },
+  {
+    "score": -88,
+    "category": "Not Applicable",
+    "rankRange": "610001 to 611250"
+  },
+  {
+    "score": -89,
+    "category": "Not Applicable",
+    "rankRange": "611251 to 612500"
+  },
+  {
+    "score": -90,
+    "category": "Not Applicable",
+    "rankRange": "612501 to 613750"
+  },
+  {
+    "score": -91,
+    "category": "Not Applicable",
+    "rankRange": "613751 to 615000"
+  },
+  {
+    "score": -92,
+    "category": "Not Applicable",
+    "rankRange": "615001 to 616250"
+  },
+  {
+    "score": -93,
+    "category": "Not Applicable",
+    "rankRange": "616251 to 617500"
+  },
+  {
+    "score": -94,
+    "category": "Not Applicable",
+    "rankRange": "617501 to 618750"
+  },
+  {
+    "score": -95,
+    "category": "Not Applicable",
+    "rankRange": "618751 to 620000"
+  },
+  {
+    "score": -96,
+    "category": "Not Applicable",
+    "rankRange": "620001 to 621250"
+  },
+  {
+    "score": -97,
+    "category": "Not Applicable",
+    "rankRange": "621251 to 622500"
+  },
+  {
+    "score": -98,
+    "category": "Not Applicable",
+    "rankRange": "622501 to 623750"
+  },
+  {
+    "score": -99,
+    "category": "Not Applicable",
+    "rankRange": "623751 to 625000"
+  },
+  {
+    "score": -100,
+    "category": "Not Applicable",
+    "rankRange": "625001 to 626250"
+  }
+]
