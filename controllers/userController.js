@@ -9,10 +9,12 @@ const fs = require("fs");
 const path = require("path");
 require("dotenv").config();
 
+const bcrypt = require('bcrypt'); // Assuming bcrypt is used for password hashing
+
+// Register User
 const registerUser = async (req, res) => {
   const {
-    name,
-    email,
+    username, // Now we get username instead of email
     password,
     confirmPassword,
     PhoneNumber,
@@ -26,9 +28,9 @@ const registerUser = async (req, res) => {
   } = req.body;
 
   // Validate required fields
-  if (!email || !password || !PhoneNumber) {
+  if (!username || !password || !PhoneNumber) {
     return res.status(400).json({
-      message: "Email, password, and phone number are required",
+      message: "Username, password, and phone number are required",
     });
   }
 
@@ -40,24 +42,18 @@ const registerUser = async (req, res) => {
   }
 
   try {
-    // Create the user in Firebase Authentication
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10); // Hash with salt rounds
 
     // Generate a unique ID based on timestamp for "on-top" sorting
     const timestamp = Date.now();
 
-    // Save user details to the Realtime Database
+    // Save user details to the Realtime Database, storing the hashed password
     const userRef = ref(database, `gio-students/${timestamp}`);
     try {
       await set(userRef, {
-        uid: user.uid,
-        email,
-        name,
+        username, // Storing the username
+        password: hashedPassword, // Storing the hashed password
         PhoneNumber,
         teacherPhoneNumber,
         whatsappNumber,
@@ -80,19 +76,17 @@ const registerUser = async (req, res) => {
       });
     }
 
-    // Generate JWT token for the user
+    // Generate JWT token for the user after registration
     const token = jwt.sign(
-      { uid: user.uid, email: user.email },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: "1d" }
+      { username }, // Include the username in the JWT payload
+      process.env.JWT_SECRET_KEY, // Secret key for signing the token
+      { expiresIn: "1d" } // Expiration time for the token (1 day)
     );
 
-    // Respond with success
     res.status(201).json({
       message: "User registered successfully",
-      uid: user.uid,
-      email: user.email,
-      token,
+      username, // Include username in the response
+      token,    // Send the JWT token to the frontend
     });
   } catch (error) {
     console.error("Error registering user:", error);
@@ -105,38 +99,56 @@ const registerUser = async (req, res) => {
 
 // Login User
 const loginUser = async (req, res) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
 
-  if (!email || !password) {
+  if (!username || !password) {
     return res.status(400).json({
-      message: "Email and password are required",
+      message: "Username and password are required",
     });
   }
 
   try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const user = userCredential.user;
+    // Look for the user by username in the database
+    const userRef = ref(database, 'gio-students');
+    const snapshot = await get(userRef);
 
+    let user = null;
+    snapshot.forEach((childSnapshot) => {
+      if (childSnapshot.val().username === username) {
+        user = childSnapshot.val(); // Found the user by username
+      }
+    });
+
+    if (!user) {
+      return res.status(401).json({
+        message: "Invalid username or password",
+      });
+    }
+
+    // Compare the entered password with the stored hashed password
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(401).json({
+        message: "Invalid username or password",
+      });
+    }
+
+    // Generate JWT token for the user
     const token = jwt.sign(
-      { uid: user.uid, email: user.email },
+      { uid: user.uid, username: user.username },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "1d" }
     );
 
     res.status(200).json({
       message: "Login successful",
-      uid: user.uid,
-      email: user.email,
+      username: user.username,
       token,
     });
   } catch (error) {
     console.error("Error logging in user:", error);
-    res.status(401).json({
-      message: "Invalid email or password",
+    res.status(500).json({
+      message: "Failed to log in user",
       error: error.message,
     });
   }
@@ -144,29 +156,44 @@ const loginUser = async (req, res) => {
 
 // Get User Profile
 const getUserProfile = async (req, res) => {
-  const user = req.user;
+  // Extract the token from the Authorization header
+  // const token = req.headers.authorization?.split(" ")[1]; // Assuming the token is sent as Bearer <token>
 
-  if (!user) {
-    return res.status(400).json({
-      message: "User data not found.",
-    });
-  }
+  // if (!token) {
+  //   return res.status(400).json({
+  //     message: "Token is required for authentication.",
+  //   });
+  // }
+  const user = req.user
+  const username = user.username
 
   try {
-    const userRef = ref(database, `gio-students/${user.uid}`);
+    // Verify the token and extract the username from it
+    // const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    // const username = decoded.username; // Assuming the username is included in the JWT payload
+
+    // Fetch user data from the database using the username (no longer using uid)
+    const userRef = ref(database, 'gio-students');
     const snapshot = await get(userRef);
 
-    if (!snapshot.exists()) {
-      return res.status(400).json({
+    let userProfile = null;
+
+    // Search for the user by username in the database
+    snapshot.forEach((childSnapshot) => {
+      if (childSnapshot.val().username === username) {
+        userProfile = childSnapshot.val(); // Found the matching user
+      }
+    });
+
+    if (!userProfile) {
+      return res.status(404).json({
         message: "User not found in the database.",
       });
     }
 
-    const userProfile = snapshot.val();
-
     res.status(200).json({
       message: "User profile fetched successfully",
-      user: userProfile,
+      user: userProfile, // Send the user's profile data
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);
@@ -176,6 +203,7 @@ const getUserProfile = async (req, res) => {
     });
   }
 };
+
 
 const updatePaymentStatus = async (req, res) => {
   const user = req.user; // Assumes `req.user` is set after authentication middleware
@@ -418,40 +446,59 @@ const updateUserRankings = async (uid, score, type) => {
   );
 };
 
+
 const getUserRankings = async (req, res) => {
-  const user = req.user;
-
-  if (!user) {
-    return res.status(400).json({
-      message: "User data not found.",
-    });
-  }
-
-  // Get and sanitize the 'type' query parameter
-  const { type } = req.query;
-  const sanitizedType = type?.trim(); // Remove extra whitespace
-
-  if (!sanitizedType) {
-    return res.status(400).json({
-      message: "Query parameter 'type' is required.",
-    });
-  }
-
-  if (!["mock", "live"].includes(sanitizedType)) {
-    return res.status(400).json({
-      message: "Query parameter 'type' must be 'mock' or 'live'.",
-    });
-  }
+  // Extract the token from the Authorization header
+  // const token = req.headers.authorization?.split(" ")[1]; // Assuming the token is sent as Bearer <token>
+const user = req.user
+  // if (!token) {
+  //   return res.status(400).json({
+  //     message: "Token is required for authentication.",
+  //   });
+  // }
 
   try {
-    const sanitizedUid = user.uid.trim(); // Remove extra whitespace from UID
-    const rankingsRef = ref(
-      database,
-      `gio-students/${sanitizedUid}/ranks/${sanitizedType}`
-    );
+    // Verify the token and extract the username from it
+    // const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const username = user.username; // Get the username from the decoded JWT
+
+    // Get and sanitize the 'type' query parameter
+    const { type } = req.query;
+    const sanitizedType = type?.trim(); // Remove extra whitespace
+
+    if (!sanitizedType) {
+      return res.status(400).json({
+        message: "Query parameter 'type' is required.",
+      });
+    }
+
+    if (!["mock", "live"].includes(sanitizedType)) {
+      return res.status(400).json({
+        message: "Query parameter 'type' must be 'mock' or 'live'.",
+      });
+    }
+
+    // Get the rankings for the user using the username (not uid)
+    const rankingsRef = ref(database, `gio-students`);
     const snapshot = await get(rankingsRef);
 
-    if (!snapshot.exists()) {
+    let userRankings = null;
+
+    // Search for the user by username in the database
+    snapshot.forEach((childSnapshot) => {
+      const userData = childSnapshot.val();
+      if (userData.username === username) {
+        // Log the user data to understand its structure
+        console.log("User Data:", userData);
+
+        // Check if 'ranks' and the 'sanitizedType' field exist before trying to access it
+        if (userData.ranks && userData.ranks[sanitizedType]) {
+          userRankings = userData.ranks[sanitizedType];
+        }
+      }
+    });
+
+    if (!userRankings) {
       return res.status(200).json({
         message: "No rankings available yet.",
         rankings: {
@@ -465,7 +512,7 @@ const getUserRankings = async (req, res) => {
 
     res.status(200).json({
       message: "Rankings fetched successfully.",
-      rankings: snapshot.val(),
+      rankings: userRankings, // Send the user's rankings
     });
   } catch (error) {
     console.error("Error fetching rankings:", error);
@@ -475,6 +522,8 @@ const getUserRankings = async (req, res) => {
     });
   }
 };
+
+
 
 module.exports = {
   registerUser,
