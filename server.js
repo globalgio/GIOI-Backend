@@ -4,6 +4,8 @@ const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes"); // Import user routes
+const adminRoutes = require("./routes/adminRoutes");
+const scoolRoutes =require("./routes/schoolRoutes")
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const razorPayment = require("./routes/razorpayRoutes");
@@ -41,6 +43,8 @@ app.use("/static", express.static(path.join(__dirname, "public")));
 // Define API routes
 app.use("/api/gio", userRoutes); // Use the userRoutes for "/api/gio" path
 app.use("/api/payment", razorPayment); // Use the razorPayment
+app.use("/api/admin", adminRoutes); // Use the adminRoutes for "/api/admin" path
+app.use("/api/school",scoolRoutes); // Use the scoolRoute for "/api/school
 
 // Route to serve JSON files
 
