@@ -6,6 +6,7 @@ const {
   saveQuizMarks,
   getUserRankings,
   updatePaymentStatus,
+  getTestCounts,
 } = require("../controllers/userController");
 const { verifyToken } = require("../middleware/verifyToken");
 
@@ -28,5 +29,5 @@ router.post("/save-quiz-marks", verifyToken, saveQuizMarks);
 // Route to update payment or test completion status
 router.patch("/update-payment-status", verifyToken, updatePaymentStatus);
 
-
+router.get("/get-test-counts", verifyToken, getTestCounts);
 module.exports = router;
