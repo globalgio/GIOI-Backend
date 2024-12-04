@@ -6,7 +6,8 @@ const {
   registerSchool,
   loginSchool,
   bulkUploadStudents,
-  getStudentsBySchoolName
+  getStudentsBySchoolName,
+  getSchoolRepresentativeDetails
 } = require("../controllers/schoolcontroller");
 
 
@@ -17,7 +18,7 @@ router.post("/login", loginSchool);
 // Bulk upload route
 router.post("/bulk-upload", upload.single("file"), bulkUploadStudents);
 
-
+router.get("/representative", getSchoolRepresentativeDetails);
 // GET ALL STUDENTS DETAILS ON VIEW
 router.get("/students",getStudentsBySchoolName);  // New route to fetch students by schoolName
 

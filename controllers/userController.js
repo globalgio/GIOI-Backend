@@ -325,27 +325,36 @@ try {
 }
 // Helper function to calculate rank and category
 const getRankAndCategory = (score, jsonData, maxScore) => {
+  // Ensure the score is a number
+  const numericScore = Number(score);
+
+  console.log("Calculating rank for:", { score: numericScore, jsonData, maxScore });
+
   // If the score is the maximum possible score, assign rank 1
-  if (score === maxScore) {
+  if (numericScore === maxScore) {
+    console.log("Score is the maximum, assigning rank 1 and Gold category.");
     return { rank: 1, category: "Gold" };
   }
 
   // Find the matching score entry in the JSON
-  const entry = jsonData.find((item) => item.score === score);
+  const entry = jsonData.find((item) => item.score === numericScore);
 
   if (!entry) {
-    return { rank: "Unranked", category: "Unranked" }; // No matching entry
+    console.log("No matching entry found for score:", numericScore);
+    return { rank: "Unranked", category: "Unranked" };
   }
 
   const [start, end] = entry.rankRange.split(" to ").map(Number);
   const randomRank = Math.floor(Math.random() * (end - start + 1)) + start;
 
+  console.log("Rank calculated:", { rank: randomRank, category: entry.category });
   return { rank: randomRank, category: entry.category };
 };
 
+
 // Save Quiz Marks
 const saveQuizMarks = async (req, res) => {
-  const { uid } = req.user; // Assuming `uid` is part of the authenticated user object
+  const { uid } = req.user;
   const { score, total, type } = req.body;
 
   if (!uid) {
@@ -361,21 +370,13 @@ const saveQuizMarks = async (req, res) => {
   }
 
   try {
-    // Sanitize testId
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const testId = `test-${timestamp}`;
 
-    // Reference to the user's marks
-    const marksRef = ref(
-      database,
-      `gio-students/${uid}/marks/${type}/${testId}`
-    );
-
-    // Save the new test marks
+    const marksRef = ref(database, `gio-students/${uid}/marks/${type}/${testId}`);
     await set(marksRef, { score, total, timestamp });
 
-    // Update Rankings
-    const maxScore = type === "mock" ? 100 : 400; // Adjust maxScore as needed
+    const maxScore = type === "mock" ? 100 : 400;
     await updateUserRankings(uid, score, type, maxScore);
 
     res.status(200).json({
@@ -384,7 +385,6 @@ const saveQuizMarks = async (req, res) => {
       } test marks saved and rankings updated successfully.`,
     });
   } catch (error) {
-    console.error("Error saving marks:", error.message);
     res.status(500).json({
       message: "Failed to save test marks.",
       error: error.message,
@@ -394,6 +394,8 @@ const saveQuizMarks = async (req, res) => {
 
 // Update User Rankings
 const updateUserRankings = async (uid, score, type, maxScore) => {
+  console.log("Updating user rankings:", { uid, score, type, maxScore });
+
   let globalData, countryData, stateData;
 
   // Select ranking JSON based on type
@@ -409,10 +411,14 @@ const updateUserRankings = async (uid, score, type, maxScore) => {
     throw new Error("Invalid type. Must be 'mock' or 'live'.");
   }
 
+  console.log("Ranking data selected:", { globalData, countryData, stateData });
+
   // Calculate ranks based on score
   const globalRank = getRankAndCategory(score, globalData, maxScore);
   const countryRank = getRankAndCategory(score, countryData, maxScore);
   const stateRank = getRankAndCategory(score, stateData, maxScore);
+
+  console.log("Ranks calculated:", { globalRank, countryRank, stateRank });
 
   // Save rankings to the appropriate node
   const rankingsRef = ref(database, `gio-students/${uid}/ranks/${type}`);
@@ -429,6 +435,8 @@ const updateUserRankings = async (uid, score, type, maxScore) => {
     uid
   );
 };
+
+
 
 // Get User Rankings
 const getUserRankings = async (req, res) => {
