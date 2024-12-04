@@ -167,6 +167,7 @@ const bulkUploadStudents = async (req, res) => {
         console.error("Error processing student:", error.message);
         failedEntries.push({ student, reason: error.message });
       }
+<<<<<<< HEAD
     }
 
     // Remove the uploaded file after processing
@@ -324,3 +325,75 @@ module.exports = {
   getStudentsBySchoolName,
   getSchoolRepresentativeDetails
 };
+=======
+  
+      // Remove the uploaded file after processing
+      fs.unlinkSync(req.file.path);
+  
+      res.status(200).json({
+        message: "Bulk upload completed",
+        successCount,
+        failedCount: failedEntries.length,
+        failedEntries,
+      });
+    } catch (error) {
+      console.error("Error in bulk upload:", error);
+      res.status(500).json({
+        message: "Failed to upload students",
+        error: error.message,
+      });
+    }
+  };
+
+
+const fetchUsersBySchool = async (req, res) => {
+    const { schoolName } = req.body;
+
+    if (!schoolName) {
+        return res.status(400).json({ message: "School name is required in the request body." });
+    }
+
+    try {
+        // Reference to the users data
+        const usersRef = ref(database, "gio-students");
+
+        // Get all users data
+        const snapshot = await get(usersRef);
+
+        if (!snapshot.exists()) {
+            return res.status(404).json({ message: "No users found." });
+        }
+
+        const users = [];
+        snapshot.forEach((childSnapshot) => {
+            const user = childSnapshot.val();
+
+            // Only include users whose schoolName matches the requested one
+            if (user.schoolName === schoolName) {
+                users.push({
+                    name: user.name,
+                    standard: user.standard,
+                    schoolName: user.schoolName,
+                    paymentStatus: user.paymentStatus,
+                    testCompleted: user.testCompleted,
+                    ranks: user.ranks,
+                });
+            }
+        });
+
+        if (users.length === 0) {
+            return res.status(404).json({ message: `No users found for ${schoolName}.` });
+        }
+
+        res.status(200).json({
+            message: "Users fetched successfully.",
+            users,
+        });
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        res.status(500).json({ message: "Failed to fetch users", error: error.message });
+    }
+};
+
+  module.exports = { registerSchool, loginSchool, bulkUploadStudents,fetchUsersBySchool };
+>>>>>>> f442124f2cb517573a66f0630d856059753a4273
