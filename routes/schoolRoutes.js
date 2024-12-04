@@ -6,12 +6,9 @@ const {
   registerSchool,
   loginSchool,
   bulkUploadStudents,
-<<<<<<< HEAD
-  getStudentsBySchoolName,
+  fetchUsersBySchool,
   getSchoolRepresentativeDetails
-=======
-  fetchUsersBySchool
->>>>>>> f442124f2cb517573a66f0630d856059753a4273
+
 } = require("../controllers/schoolcontroller");
 
 
