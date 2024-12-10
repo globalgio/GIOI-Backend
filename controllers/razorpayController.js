@@ -1,14 +1,14 @@
 const Razorpay = require("razorpay");
 require("dotenv").config();
+
 // Initialize Razorpay instance
 const razorpay = new Razorpay({
   key_id: process.env.RZP_KEY_ID, // Add your Razorpay Key ID here
   key_secret: process.env.RZP_SECRET_KEY, // Add your Razorpay Secret here
 });
 
-
+// Function to create order
 const createOrder = async (req, res) => {
-
   const { amount } = req.body; // Amount in INR
   try {
     const options = {
@@ -31,4 +31,6 @@ const createOrder = async (req, res) => {
   }
 };
 
-module.exports = { createOrder };
+
+
+module.exports = { createOrder};

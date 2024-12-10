@@ -20,7 +20,8 @@ const fs = require("fs");
 require("dotenv").config();
 
 const registerSchool = async (req, res) => {
-  const { schoolName, email, password, confirmPassword } = req.body;
+  const { schoolName, email, password, confirmPassword, principalName } =
+    req.body;
 
   if (!schoolName || !email || !password || !confirmPassword) {
     return res.status(400).json({
@@ -50,6 +51,7 @@ const registerSchool = async (req, res) => {
       uid: user.uid,
       email,
       schoolName,
+      principalName, // Store the principal's name
       role: "school", // Assigning the role as 'school'
       createdAt: new Date().toISOString(),
     });
@@ -207,31 +209,60 @@ const bulkUploadStudents = async (req, res) => {
 };
 
 const fetchUsersBySchool = async (req, res) => {
-  const { schoolName } = req.query;
+  const { schoolName, standard } = req.query;
 
   if (!schoolName) {
-    return res
-      .status(400)
-      .json({ message: "School name is required in the request body." });
+    return res.status(400).json({ message: "School name is required." });
   }
 
   try {
-    // Reference to all students in gio-students
-    const usersRef = ref(database, "gio-students");
+    console.log("School Name Query:", schoolName);
+    console.log("Standard Query:", standard || "All standards");
 
-    // Fetch all students data
+    const usersRef = ref(database, "gio-students");
     const snapshot = await get(usersRef);
 
     if (!snapshot.exists()) {
-      return res.status(404).json({ message: "No students found." });
+      console.log("gio-students node does not exist in the database.");
+      return res.status(200).json({ message: "No students found.", users: [] });
     }
 
+    const standardQuery = standard ? standard.trim().toLowerCase() : "";
     const users = [];
+
     snapshot.forEach((childSnapshot) => {
       const user = childSnapshot.val();
+      console.log(
+        "User Standard:",
+        user.standard,
+        "Type:",
+        typeof user.standard
+      );
 
-      // Match by schoolName and push user details into the array
-      if (user.schoolName === schoolName) {
+      const matchesSchool =
+        user.schoolName &&
+        user.schoolName.trim().toLowerCase() ===
+          schoolName.trim().toLowerCase();
+
+      let matchesStandard = false;
+
+      if (!standardQuery) {
+        matchesStandard = true; // No filter applied
+      } else {
+        const normalizedStandard =
+          typeof user.standard === "number"
+            ? String(user.standard)
+            : user.standard.trim().toLowerCase();
+
+        const formattedStandardQuery = standardQuery.replace(/th$/, "");
+
+        matchesStandard =
+          normalizedStandard === formattedStandardQuery ||
+          normalizedStandard === `${formattedStandardQuery}th`;
+      }
+
+      if (matchesSchool && matchesStandard) {
+        // Include marks, certificateCodes, and other student information
         users.push({
           uid: user.uid,
           name: user.name,
@@ -246,25 +277,33 @@ const fetchUsersBySchool = async (req, res) => {
           city: user.city,
           paymentStatus: user.paymentStatus,
           testCompleted: user.testCompleted,
-          ranks: {
-            live: user.ranks?.live || {}, // Include live ranks
-            mock: user.ranks?.mock || {}, // Include mock ranks
-          },
           createdAt: user.createdAt,
+          marks: user.marks || {}, // Include marks (default to empty object if not available)
+          certificateCodes: user.certificateCodes || [], // Include certificateCodes (default to empty array if not available)
+          ranks: {
+            live: user.ranks?.live || {},
+            mock: user.ranks?.mock || {},
+          },
         });
       }
     });
 
+    // If no users match the criteria, return an empty array
     if (users.length === 0) {
-      return res
-        .status(404)
-        .json({ message: `No users found for ${schoolName}.` });
+      console.log(
+        `No users found for school '${schoolName}' and standard '${
+          standardQuery || "all"
+        }'.`
+      );
+      return res.status(200).json({
+        message: `No users found for school '${schoolName}' and standard '${
+          standardQuery || "all"
+        }'.`,
+        users: [],
+      });
     }
 
-    res.status(200).json({
-      message: "Users fetched successfully.",
-      users,
-    });
+    res.status(200).json({ message: "Users fetched successfully.", users });
   } catch (error) {
     console.error("Error fetching users:", error.message);
     res
@@ -273,8 +312,8 @@ const fetchUsersBySchool = async (req, res) => {
   }
 };
 
+
 const getSchoolRepresentativeDetails = async (req, res) => {
-  // Get token from headers
   const token = req.header("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
@@ -284,7 +323,6 @@ const getSchoolRepresentativeDetails = async (req, res) => {
   }
 
   try {
-    // Decode the token
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
 
     // Fetch school details from Firebase Database using decoded token UID
@@ -299,15 +337,42 @@ const getSchoolRepresentativeDetails = async (req, res) => {
 
     const schoolData = snapshot.val();
 
-    // Return the representative's details
-    return res.status(200).json({
+    // Reference to all students in gio-students
+    const studentsRef = ref(database, "gio-students");
+    const studentsSnapshot = await get(studentsRef);
+
+    let totalPracticeTests = 0; // Mock test count
+    let finalPracticeTests = 0; // Live test count
+
+    if (studentsSnapshot.exists()) {
+      studentsSnapshot.forEach((childSnapshot) => {
+        const student = childSnapshot.val();
+
+        if (
+          student.schoolName &&
+          student.schoolName.trim().toLowerCase() ===
+            schoolData.schoolName.trim().toLowerCase()
+        ) {
+          const marks = student.marks || {};
+          totalPracticeTests += marks.mock ? Object.keys(marks.mock).length : 0;
+          finalPracticeTests += marks.live ? Object.keys(marks.live).length : 0;
+        }
+      });
+    }
+
+    res.status(200).json({
       message: "School representative details fetched successfully.",
       representative: {
         uid: decoded.uid,
         email: schoolData.email,
         schoolName: schoolData.schoolName,
+        principalName: schoolData.principalName,
         role: schoolData.role || "school",
         createdAt: schoolData.createdAt || null,
+      },
+      practiceTestCounts: {
+        totalPracticeTests,
+        finalPracticeTests,
       },
     });
   } catch (error) {

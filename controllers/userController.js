@@ -159,34 +159,30 @@ const loginUser = async (req, res) => {
 
 // Get User Profile
 const getUserProfile = async (req, res) => {
-  // Extract the token from the Authorization header
-  // const token = req.headers.authorization?.split(" ")[1]; // Assuming the token is sent as Bearer <token>
+  const user = req.user; // Extract user information from middleware (e.g., authentication middleware)
+  const username = user?.username; // Ensure username exists
 
-  // if (!token) {
-  //   return res.status(400).json({
-  //     message: "Token is required for authentication.",
-  //   });
-  // }
-  const user = req.user;
-  const username = user.username;
+  if (!username) {
+    return res.status(400).json({
+      message: "Username is required for authentication.",
+    });
+  }
 
   try {
-    // Verify the token and extract the username from it
-    // const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    // const username = decoded.username; // Assuming the username is included in the JWT payload
-
-    // Fetch user data from the database using the username (no longer using uid)
+    // Fetch the database reference
     const userRef = ref(database, "gio-students");
     const snapshot = await get(userRef);
 
-    let userProfile = null;
+    if (!snapshot.exists()) {
+      return res.status(404).json({
+        message: "No users found in the database.",
+      });
+    }
 
-    // Search for the user by username in the database
-    snapshot.forEach((childSnapshot) => {
-      if (childSnapshot.val().username === username) {
-        userProfile = childSnapshot.val(); // Found the matching user
-      }
-    });
+    // Find the user profile based on the username
+    const userProfile = Object.values(snapshot.val()).find(
+      (userData) => userData.username === username
+    );
 
     if (!userProfile) {
       return res.status(404).json({
@@ -195,13 +191,13 @@ const getUserProfile = async (req, res) => {
     }
 
     res.status(200).json({
-      message: "User profile fetched successfully",
-      user: userProfile, // Send the user's profile data
+      message: "User profile fetched successfully.",
+      user: userProfile,
     });
   } catch (error) {
     console.error("Error fetching user profile:", error);
     res.status(500).json({
-      message: "Failed to fetch user profile",
+      message: "Failed to fetch user profile.",
       error: error.message,
     });
   }
@@ -225,8 +221,8 @@ const updatePaymentStatus = async (req, res) => {
 
   try {
     const userRef = ref(database, `gio-students/${user.uid}`);
-
     const snapshot = await get(userRef);
+
     if (!snapshot.exists()) {
       return res.status(400).json({
         message: "User not found in the database.",
@@ -257,6 +253,9 @@ const updatePaymentStatus = async (req, res) => {
     });
   }
 };
+
+
+
 
 // Load Mock Ranks JSON
 let globalMockRanksData, countryMockRanksData, stateMockRanksData;
@@ -325,36 +324,29 @@ try {
 }
 // Helper function to calculate rank and category
 const getRankAndCategory = (score, jsonData, maxScore) => {
-  // Ensure the score is a number
-  const numericScore = Number(score);
-
-  console.log("Calculating rank for:", { score: numericScore, jsonData, maxScore });
+  score = Number(score); // Ensure score is a number
 
   // If the score is the maximum possible score, assign rank 1
-  if (numericScore === maxScore) {
-    console.log("Score is the maximum, assigning rank 1 and Gold category.");
+  if (score === maxScore) {
     return { rank: 1, category: "Gold" };
   }
 
   // Find the matching score entry in the JSON
-  const entry = jsonData.find((item) => item.score === numericScore);
+  const entry = jsonData.find((item) => item.score === score);
 
   if (!entry) {
-    console.log("No matching entry found for score:", numericScore);
-    return { rank: "Unranked", category: "Unranked" };
+    return { rank: "Unranked", category: "Unranked" }; // No matching entry
   }
 
   const [start, end] = entry.rankRange.split(" to ").map(Number);
   const randomRank = Math.floor(Math.random() * (end - start + 1)) + start;
 
-  console.log("Rank calculated:", { rank: randomRank, category: entry.category });
   return { rank: randomRank, category: entry.category };
 };
 
-
 // Save Quiz Marks
 const saveQuizMarks = async (req, res) => {
-  const { uid } = req.user;
+  const { uid } = req.user; // Assuming `uid` is part of the authenticated user object
   const { score, total, type } = req.body;
 
   if (!uid) {
@@ -370,21 +362,74 @@ const saveQuizMarks = async (req, res) => {
   }
 
   try {
+    // Convert score and total to numbers
+    const scoreNum = Number(score);
+    const totalNum = Number(total);
+
+    // Sanitize testId
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const testId = `test-${timestamp}`;
 
-    const marksRef = ref(database, `gio-students/${uid}/marks/${type}/${testId}`);
-    await set(marksRef, { score, total, timestamp });
+    // Reference to the user's marks
+    const marksRef = ref(
+      database,
+      `gio-students/${uid}/marks/${type}/${testId}`
+    );
 
-    const maxScore = type === "mock" ? 100 : 400;
-    await updateUserRankings(uid, score, type, maxScore);
+    // Save the new test marks
+    await set(marksRef, { score: scoreNum, total: totalNum, timestamp });
 
-    res.status(200).json({
-      message: `${
-        type.charAt(0).toUpperCase() + type.slice(1)
-      } test marks saved and rankings updated successfully.`,
-    });
+    // Update Rankings
+    const maxScore = type === "mock" ? 100 : 400; // Adjust maxScore as needed
+    await updateUserRankings(uid, scoreNum, type, maxScore);
+
+    // Fetch rankings after saving and updating them
+    const rankingsRef = ref(database, `gio-students/${uid}/ranks/${type}`);
+    const snapshot = await get(rankingsRef);
+
+    if (!snapshot.exists()) {
+      console.log("Rankings not found for type:", type); // Log to debug
+      return res.status(200).json({
+        message: "No rankings available yet.",
+        rankings: {
+          global: { rank: "Unranked", category: "Unranked" },
+          country: { rank: "Unranked", category: "Unranked" },
+          state: { rank: "Unranked", category: "Unranked" },
+        },
+      });
+    }
+
+    const userRankings = snapshot.val();
+
+    // Check if this is a live test with a total of 400 marks
+    if (type === "live" && totalNum === 400) {
+      // Generate a 4-digit random certificate code
+      const certificateCode = `GIO-GQC-${Math.floor(
+        1000 + Math.random() * 9000
+      )}`;
+
+      // Update the user's certificate code, ensuring only the latest one is saved
+      await set(
+        ref(database, `gio-students/${uid}/certificateCodes`),
+        [certificateCode] // Overwrite with only the latest certificate code
+      );
+
+      return res.status(200).json({
+        message:
+          "Live test marks saved, rankings updated, and certificate code generated.",
+        rankings: userRankings,
+        certificateCode, // Return the newly generated certificate code
+      });
+    } else {
+      return res.status(200).json({
+        message: `${
+          type.charAt(0).toUpperCase() + type.slice(1)
+        } test marks saved and rankings updated successfully.`,
+        rankings: userRankings, // Return the rankings as part of the response
+      });
+    }
   } catch (error) {
+    console.error("Error saving marks:", error.message);
     res.status(500).json({
       message: "Failed to save test marks.",
       error: error.message,
@@ -394,8 +439,6 @@ const saveQuizMarks = async (req, res) => {
 
 // Update User Rankings
 const updateUserRankings = async (uid, score, type, maxScore) => {
-  console.log("Updating user rankings:", { uid, score, type, maxScore });
-
   let globalData, countryData, stateData;
 
   // Select ranking JSON based on type
@@ -411,14 +454,10 @@ const updateUserRankings = async (uid, score, type, maxScore) => {
     throw new Error("Invalid type. Must be 'mock' or 'live'.");
   }
 
-  console.log("Ranking data selected:", { globalData, countryData, stateData });
-
   // Calculate ranks based on score
   const globalRank = getRankAndCategory(score, globalData, maxScore);
   const countryRank = getRankAndCategory(score, countryData, maxScore);
   const stateRank = getRankAndCategory(score, stateData, maxScore);
-
-  console.log("Ranks calculated:", { globalRank, countryRank, stateRank });
 
   // Save rankings to the appropriate node
   const rankingsRef = ref(database, `gio-students/${uid}/ranks/${type}`);
@@ -435,8 +474,6 @@ const updateUserRankings = async (uid, score, type, maxScore) => {
     uid
   );
 };
-
-
 
 // Get User Rankings
 const getUserRankings = async (req, res) => {
@@ -458,8 +495,8 @@ const getUserRankings = async (req, res) => {
   try {
     const rankingsRef = ref(database, `gio-students/${uid}/ranks/${type}`);
     const snapshot = await get(rankingsRef);
-
     if (!snapshot.exists()) {
+      console.log("Rankings not found for type:", type); // Log to debug
       return res.status(200).json({
         message: "No rankings available yet.",
         rankings: {
@@ -524,6 +561,98 @@ const getTestCounts = async (req, res) => {
     });
   }
 };
+const getAllStudentsTestCounts = async (req, res) => {
+  try {
+    const { uid } = req.user; // The authenticated school user UID
+
+    if (!uid) {
+      return res.status(400).json({ message: "User UID is required." });
+    }
+
+    // Fetch the school name from the user's profile (this assumes you have the school in the user's data)
+    const schoolName = req.user.schoolName; // Assuming `schoolName` is available in `req.user`
+
+    // Reference to all students in the school
+    const studentsRef = ref(database, `gio-students`);
+    const snapshot = await get(studentsRef);
+
+    if (!snapshot.exists()) {
+      return res.status(200).json({
+        message: "No students found for the school.",
+        mock: 0,
+        live: 0,
+      });
+    }
+
+    const students = snapshot.val();
+
+    let mockCount = 0;
+    let liveCount = 0;
+
+    // Loop through all students to count mock and live tests
+    Object.values(students).forEach((student) => {
+      if (student.marks && student.marks.mock) {
+        mockCount += Object.keys(student.marks.mock).length;
+      }
+      if (student.marks && student.marks.live) {
+        liveCount += Object.keys(student.marks.live).length;
+      }
+    });
+
+    res.status(200).json({
+      message: "Test counts fetched successfully.",
+      mock: mockCount,
+      live: liveCount,
+    });
+  } catch (error) {
+    console.error("Error fetching all students' test counts:", error.message);
+    res.status(500).json({
+      message: "Failed to fetch test counts.",
+      error: error.message,
+    });
+  }
+};
+
+// const verifyCertificateCode = async (req, res) => {
+//   const { certificateCode } = req.body;
+
+//   if (!certificateCode) {
+//     return res.status(400).json({
+//       message: "Certificate code is required",
+//     });
+//   }
+
+//   try {
+//     // Search for the certificate code in the database
+//     const certificateRef = ref(database, `gio-certificates/${certificateCode}`);
+//     const snapshot = await get(certificateRef);
+
+//     if (!snapshot.exists()) {
+//       return res.status(404).json({
+//         message: "Invalid certificate code",
+//       });
+//     }
+
+//     const certificateData = snapshot.val(); // Certificate data retrieved from the database
+
+//     // Proceed to generate the certificate PDF (You can use a library like PDFKit or any other for PDF generation)
+//     const pdfPath = path.join(__dirname, 'certificates', `${certificateData.certificateCode}.pdf`);
+//     generatePdf(certificateData, pdfPath);
+
+//     // Send the PDF to the user (For now, we just send the file path, you can send the file as a response in production)
+//     res.status(200).json({
+//       message: "Certificate generated successfully",
+//       certificatePdfPath: pdfPath, // This can be the path or URL for the PDF
+//       type: certificateData.type, // Send the certificate type (GQC)
+//     });
+//   } catch (error) {
+//     console.error("Error verifying certificate code:", error);
+//     res.status(500).json({
+//       message: "Failed to verify certificate code",
+//       error: error.message,
+//     });
+//   }
+// };
 
 module.exports = {
   registerUser,
@@ -533,4 +662,7 @@ module.exports = {
   updatePaymentStatus,
   getUserRankings,
   getTestCounts,
+  getAllStudentsTestCounts,
+  // verifyCertificateCode,
+
 };

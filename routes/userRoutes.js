@@ -7,6 +7,9 @@ const {
   getUserRankings,
   updatePaymentStatus,
   getTestCounts,
+  getAllStudentsTestCounts,
+  verifyRazorpayPayment
+  // verifyCertificateCode
 } = require("../controllers/userController");
 const { verifyToken } = require("../middleware/verifyToken");
 
@@ -30,4 +33,13 @@ router.post("/save-quiz-marks", verifyToken, saveQuizMarks);
 router.patch("/update-payment-status", verifyToken, updatePaymentStatus);
 
 router.get("/get-test-counts", verifyToken, getTestCounts);
+router.get(
+  "/get-all-students-test-counts",
+  verifyToken,
+  getAllStudentsTestCounts
+);
+
+// Route to verify a certificate code
+// router.post('/verify', verifyCertificateCode);
+
 module.exports = router;
