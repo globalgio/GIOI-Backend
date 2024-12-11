@@ -204,19 +204,11 @@ const getUserProfile = async (req, res) => {
 };
 
 const updatePaymentStatus = async (req, res) => {
-  const user = req.user; // Assumes `req.user` is set after authentication middleware
-  const { paymentStatus, testCompleted } = req.body;
+  const { paymentStatus } = req.body;
+  const user = req.user;
 
   if (!user) {
-    return res.status(400).json({
-      message: "User data not found.",
-    });
-  }
-
-  if (paymentStatus === undefined && testCompleted === undefined) {
-    return res.status(400).json({
-      message: "At least one of paymentStatus or testCompleted is required.",
-    });
+    return res.status(400).json({ message: "User data not found." });
   }
 
   try {
@@ -224,35 +216,33 @@ const updatePaymentStatus = async (req, res) => {
     const snapshot = await get(userRef);
 
     if (!snapshot.exists()) {
-      return res.status(400).json({
-        message: "User not found in the database.",
-      });
+      return res.status(400).json({ message: "User not found in the database." });
     }
 
-    const updates = {};
-    if (paymentStatus !== undefined) {
-      updates.paymentStatus = paymentStatus; // Example values: "unpaid", "paid_but_not_attempted"
-    }
-    if (testCompleted !== undefined) {
-      updates.testCompleted = testCompleted; // Example values: true, false
+    const userData = snapshot.val();
+
+    const updates = {
+      ...userData,
+      paymentStatus,
+    };
+
+    // If paymentStatus indicates quiz completion or a new cycle, reset testCompleted
+    if (paymentStatus === "quiz_attempted") {
+      updates.testCompleted = true; // Mark as completed
+    } else if (paymentStatus === "unpaid") {
+      updates.testCompleted = false; // Reset for the next attempt
     }
 
-    await set(userRef, {
-      ...snapshot.val(),
-      ...updates, // Update only the specified fields
-    });
+    await set(userRef, updates);
 
-    res.status(200).json({
-      message: "Payment status and/or test completion updated successfully.",
-    });
+    res.status(200).json({ message: "Payment status and test state updated successfully." });
   } catch (error) {
     console.error("Error updating payment status:", error);
-    res.status(500).json({
-      message: "Failed to update payment status.",
-      error: error.message,
-    });
+    res.status(500).json({ message: "Failed to update payment status." });
   }
 };
+
+
 
 
 
