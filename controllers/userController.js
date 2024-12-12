@@ -68,7 +68,6 @@ const registerUser = async (req, res) => {
         ranks: {},
         createdAt: new Date().toISOString(),
       });
-    
     } catch (dbError) {
       console.error("Error writing user details to the database:", dbError);
       return res.status(500).json({
@@ -216,7 +215,9 @@ const updatePaymentStatus = async (req, res) => {
     const snapshot = await get(userRef);
 
     if (!snapshot.exists()) {
-      return res.status(400).json({ message: "User not found in the database." });
+      return res
+        .status(400)
+        .json({ message: "User not found in the database." });
     }
 
     const userData = snapshot.val();
@@ -235,17 +236,14 @@ const updatePaymentStatus = async (req, res) => {
 
     await set(userRef, updates);
 
-    res.status(200).json({ message: "Payment status and test state updated successfully." });
+    res
+      .status(200)
+      .json({ message: "Payment status and test state updated successfully." });
   } catch (error) {
     console.error("Error updating payment status:", error);
     res.status(500).json({ message: "Failed to update payment status." });
   }
 };
-
-
-
-
-
 
 // Load Mock Ranks JSON
 let globalMockRanksData, countryMockRanksData, stateMockRanksData;
@@ -335,6 +333,7 @@ const getRankAndCategory = (score, jsonData, maxScore) => {
 };
 
 // Save Quiz Marks
+
 const saveQuizMarks = async (req, res) => {
   const { uid } = req.user; // Assuming `uid` is part of the authenticated user object
   const { score, total, type } = req.body;
@@ -373,12 +372,13 @@ const saveQuizMarks = async (req, res) => {
     const maxScore = type === "mock" ? 100 : 400; // Adjust maxScore as needed
     await updateUserRankings(uid, scoreNum, type, maxScore);
 
-    // Fetch rankings after saving and updating them
-    const rankingsRef = ref(database, `gio-students/${uid}/ranks/${type}`);
-    const snapshot = await get(rankingsRef);
+    // Fetch rankings and user data (including name)
+    const [rankingsSnapshot, userSnapshot] = await Promise.all([
+      get(ref(database, `gio-students/${uid}/ranks/${type}`)),
+      get(ref(database, `gio-students/${uid}`)), // Fetch user details including name
+    ]);
 
-    if (!snapshot.exists()) {
-    
+    if (!rankingsSnapshot.exists()) {
       return res.status(200).json({
         message: "No rankings available yet.",
         rankings: {
@@ -389,7 +389,9 @@ const saveQuizMarks = async (req, res) => {
       });
     }
 
-    const userRankings = snapshot.val();
+    const userRankings = rankingsSnapshot.val();
+    const userData = userSnapshot.val();
+    const userName = userData.name || "Unknown"; // Get the user's name from the database
 
     // Check if this is a live test with a total of 400 marks
     if (type === "live" && totalNum === 400) {
@@ -398,17 +400,30 @@ const saveQuizMarks = async (req, res) => {
         1000 + Math.random() * 9000
       )}`;
 
-      // Update the user's certificate code, ensuring only the latest one is saved
-      await set(
-        ref(database, `gio-students/${uid}/certificateCodes`),
-        [certificateCode] // Overwrite with only the latest certificate code
+      // Construct certificate data including name
+      const certificateData = {
+        code: certificateCode,
+        name: userName, // Include the user's name in the certificate data
+        rankings: {
+          global: userRankings.global,
+          country: userRankings.country,
+          state: userRankings.state,
+        },
+        timestamp: new Date().toISOString(), // Include timestamp for the certificate
+      };
+
+      // Save the certificate data
+      const certificateRef = ref(
+        database,
+        `gio-students/${uid}/certificateCodes`
       );
+      await set(certificateRef, certificateData); // Overwrite with the latest certificate data
 
       return res.status(200).json({
         message:
           "Live test marks saved, rankings updated, and certificate code generated.",
         rankings: userRankings,
-        certificateCode, // Return the newly generated certificate code
+        certificate: certificateData, // Return the newly generated certificate data
       });
     } else {
       return res.status(200).json({
@@ -456,8 +471,6 @@ const updateUserRankings = async (uid, score, type, maxScore) => {
     country: countryRank,
     state: stateRank,
   });
-
- 
 };
 
 // Get User Rankings
@@ -481,7 +494,6 @@ const getUserRankings = async (req, res) => {
     const rankingsRef = ref(database, `gio-students/${uid}/ranks/${type}`);
     const snapshot = await get(rankingsRef);
     if (!snapshot.exists()) {
-    
       return res.status(200).json({
         message: "No rankings available yet.",
         rankings: {
@@ -598,46 +610,58 @@ const getAllStudentsTestCounts = async (req, res) => {
   }
 };
 
-// const verifyCertificateCode = async (req, res) => {
-//   const { certificateCode } = req.body;
+const verifyCertificateCode = async (req, res) => {
+  const { certificateCode } = req.body;
 
-//   if (!certificateCode) {
-//     return res.status(400).json({
-//       message: "Certificate code is required",
-//     });
-//   }
+  if (!certificateCode) {
+    return res.status(400).json({
+      message: "Certificate code is required",
+    });
+  }
 
-//   try {
-//     // Search for the certificate code in the database
-//     const certificateRef = ref(database, `gio-certificates/${certificateCode}`);
-//     const snapshot = await get(certificateRef);
+  try {
+    // Reference to the 'gio-students' path in the database
+    const studentsRef = ref(database, `gio-students`);
+    const snapshot = await get(studentsRef);
 
-//     if (!snapshot.exists()) {
-//       return res.status(404).json({
-//         message: "Invalid certificate code",
-//       });
-//     }
+    if (!snapshot.exists()) {
+      return res.status(404).json({
+        message: "No students found in the database",
+      });
+    }
 
-//     const certificateData = snapshot.val(); // Certificate data retrieved from the database
+    // Search for the certificate code within 'certificateCodes'
+    let certificateData = null;
+    snapshot.forEach((childSnapshot) => {
+      const studentData = childSnapshot.val();
+      if (studentData.certificateCodes?.code === certificateCode) {
+        certificateData = studentData.certificateCodes;
+      }
+    });
 
-//     // Proceed to generate the certificate PDF (You can use a library like PDFKit or any other for PDF generation)
-//     const pdfPath = path.join(__dirname, 'certificates', `${certificateData.certificateCode}.pdf`);
-//     generatePdf(certificateData, pdfPath);
+    if (!certificateData) {
+      return res.status(404).json({
+        message: `Certificate code not found: ${certificateCode}`,
+      });
+    }
 
-//     // Send the PDF to the user (For now, we just send the file path, you can send the file as a response in production)
-//     res.status(200).json({
-//       message: "Certificate generated successfully",
-//       certificatePdfPath: pdfPath, // This can be the path or URL for the PDF
-//       type: certificateData.type, // Send the certificate type (GQC)
-//     });
-//   } catch (error) {
-//     console.error("Error verifying certificate code:", error);
-//     res.status(500).json({
-//       message: "Failed to verify certificate code",
-//       error: error.message,
-//     });
-//   }
-// };
+    // Return the certificate details
+    return res.status(200).json({
+      message: "Certificate verified successfully",
+      certificateCode: certificateData.code,
+      rankings: certificateData.rankings,
+      timestamp: certificateData.timestamp,
+    });
+  } catch (error) {
+    console.error("Error verifying certificate code:", error);
+    res.status(500).json({
+      message: "Failed to verify certificate code",
+      error: error.message,
+    });
+  }
+};
+
+
 
 module.exports = {
   registerUser,
@@ -648,6 +672,5 @@ module.exports = {
   getUserRankings,
   getTestCounts,
   getAllStudentsTestCounts,
-  // verifyCertificateCode,
-
+  verifyCertificateCode,
 };

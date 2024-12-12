@@ -8,8 +8,8 @@ const {
   updatePaymentStatus,
   getTestCounts,
   getAllStudentsTestCounts,
-  verifyRazorpayPayment
-  // verifyCertificateCode
+
+  verifyCertificateCode
 } = require("../controllers/userController");
 const { verifyToken } = require("../middleware/verifyToken");
 
@@ -40,6 +40,6 @@ router.get(
 );
 
 // Route to verify a certificate code
-// router.post('/verify', verifyCertificateCode);
+router.post('/verify', verifyCertificateCode);
 
 module.exports = router;
