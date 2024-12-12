@@ -23,13 +23,15 @@ const registerSchool = async (req, res) => {
   const { schoolName, email, password, confirmPassword, principalName } =
     req.body;
 
-  if (!schoolName || !email || !password || !confirmPassword) {
+  // Validate all required fields
+  if (!schoolName || !email || !password || !confirmPassword || !principalName) {
     return res.status(400).json({
       message:
-        "All fields are required: schoolName, email, password, confirmPassword.",
+        "All fields are required: schoolName, email, password, confirmPassword, and principalName.",
     });
   }
 
+  // Validate if password and confirm password match
   if (password !== confirmPassword) {
     return res
       .status(400)
@@ -71,6 +73,7 @@ const registerSchool = async (req, res) => {
       .json({ message: "Failed to register school", error: error.message });
   }
 };
+
 // Login for school
 const loginSchool = async (req, res) => {
   const { email, password } = req.body;
