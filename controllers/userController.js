@@ -68,7 +68,7 @@ const registerUser = async (req, res) => {
         ranks: {},
         createdAt: new Date().toISOString(),
       });
-      console.log("User details successfully written to the database.");
+    
     } catch (dbError) {
       console.error("Error writing user details to the database:", dbError);
       return res.status(500).json({
@@ -378,7 +378,7 @@ const saveQuizMarks = async (req, res) => {
     const snapshot = await get(rankingsRef);
 
     if (!snapshot.exists()) {
-      console.log("Rankings not found for type:", type); // Log to debug
+    
       return res.status(200).json({
         message: "No rankings available yet.",
         rankings: {
@@ -457,12 +457,7 @@ const updateUserRankings = async (uid, score, type, maxScore) => {
     state: stateRank,
   });
 
-  console.log(
-    `${
-      type.charAt(0).toUpperCase() + type.slice(1)
-    } rankings updated successfully for user:`,
-    uid
-  );
+ 
 };
 
 // Get User Rankings
@@ -486,7 +481,7 @@ const getUserRankings = async (req, res) => {
     const rankingsRef = ref(database, `gio-students/${uid}/ranks/${type}`);
     const snapshot = await get(rankingsRef);
     if (!snapshot.exists()) {
-      console.log("Rankings not found for type:", type); // Log to debug
+    
       return res.status(200).json({
         message: "No rankings available yet.",
         rankings: {

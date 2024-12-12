@@ -110,7 +110,7 @@ const bulkUploadStudents = async (req, res) => {
   }
 
   try {
-    console.log("Processing file:", req.file.path);
+ 
 
     // Read uploaded Excel file
     const workbook = xlsx.readFile(req.file.path);
@@ -216,14 +216,13 @@ const fetchUsersBySchool = async (req, res) => {
   }
 
   try {
-    console.log("School Name Query:", schoolName);
-    console.log("Standard Query:", standard || "All standards");
+  
 
     const usersRef = ref(database, "gio-students");
     const snapshot = await get(usersRef);
 
     if (!snapshot.exists()) {
-      console.log("gio-students node does not exist in the database.");
+     
       return res.status(200).json({ message: "No students found.", users: [] });
     }
 
@@ -232,12 +231,7 @@ const fetchUsersBySchool = async (req, res) => {
 
     snapshot.forEach((childSnapshot) => {
       const user = childSnapshot.val();
-      console.log(
-        "User Standard:",
-        user.standard,
-        "Type:",
-        typeof user.standard
-      );
+     
 
       const matchesSchool =
         user.schoolName &&
@@ -290,11 +284,7 @@ const fetchUsersBySchool = async (req, res) => {
 
     // If no users match the criteria, return an empty array
     if (users.length === 0) {
-      console.log(
-        `No users found for school '${schoolName}' and standard '${
-          standardQuery || "all"
-        }'.`
-      );
+     
       return res.status(200).json({
         message: `No users found for school '${schoolName}' and standard '${
           standardQuery || "all"

@@ -1,3 +1,4 @@
+const debug = require("debug")("app:server");
 const express = require("express");
 const cors = require("cors");
 const helmet = require("helmet");
@@ -49,8 +50,9 @@ app.use("/api/school",scoolRoutes); // Use the scoolRoute for "/api/school
 // Route to serve JSON files
 
 // Start the server
+
 app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+  debug(`Server is running on http://localhost:${PORT}`);
 });
 
 app.get("/", (req, res) => {

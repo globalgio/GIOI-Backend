@@ -15,14 +15,14 @@ const adminLogin = async (req, res) => {
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        console.log("Authenticated user:", user.uid);  // Log the UID of the authenticated user
+       
 
         const userRef = ref(database, `admins/${user.uid}`);
         const snapshot = await get(userRef);
 
         if (snapshot.exists()) {
             const adminData = snapshot.val();
-            console.log("Admin data fetched from Firebase:", adminData);  // Log the fetched admin data
+         
 
             if (adminData.role === "admin") {
                 const token = jwt.sign(
