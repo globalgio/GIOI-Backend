@@ -5,12 +5,11 @@ const {
 } = require("firebase/auth");
 const {
   ref,
-  query,
-  orderByChild,
-  equalTo,
+
+
   get,
   set,
-  push,
+
 } = require("firebase/database");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt"); // Assuming bcrypt is used for password hashing
