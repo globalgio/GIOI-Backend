@@ -8,7 +8,7 @@ const {
   updatePaymentStatus,
   getTestCounts,
   getAllStudentsTestCounts,
-
+  updateUserProfile,
   verifyCertificateCode
 } = require("../controllers/userController");
 const { verifyToken } = require("../middleware/verifyToken");
@@ -41,5 +41,6 @@ router.get(
 
 // Route to verify a certificate code
 router.post('/verify', verifyCertificateCode);
+router.post("/update-profile", verifyToken, updateUserProfile);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 const { database } = require("../config/firebase-config");
 
-const { ref, set, get } = require("firebase/database");
+const { ref, set, get,remove } = require("firebase/database");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
@@ -8,6 +8,92 @@ const { v4: uuidv4 } = require("uuid");
 require("dotenv").config();
 
 const bcrypt = require("bcrypt"); // Assuming bcrypt is used for password hashing
+
+const updateUserProfile = async (req, res) => {
+  const { uid, deleteAccount } = req.body; // Include deleteAccount flag from frontend
+
+  if (!uid) {
+    return res.status(400).json({ message: "Student UID is required." });
+  }
+
+  try {
+    // Reference to the student's data in the database
+    const userRef = ref(database, `gio-students/${uid}`);
+    const snapshot = await get(userRef);
+
+    if (!snapshot.exists()) {
+      return res
+        .status(404)
+        .json({ message: "Student not found in the database." });
+    }
+
+    // Handle Deletion Logic
+    if (deleteAccount) {
+      await remove(userRef); // Deletes the student record
+      return res
+        .status(200)
+        .json({ message: "Student account deleted successfully." });
+    }
+
+    // Handle Update Logic
+    const {
+      name,
+      username,
+      password,
+      confirmPassword,
+      PhoneNumber,
+      teacherPhoneNumber,
+      whatsappNumber,
+      standard,
+      schoolName,
+      country,
+      state,
+      city,
+    } = req.body;
+
+    // Validate password match (if provided)
+    if (password && confirmPassword && password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match." });
+    }
+
+    const userData = snapshot.val(); // Existing student data
+
+    // Update fields if provided, else retain existing data
+    const updatedData = {
+      ...userData,
+      name: name || userData.name,
+      username: username || userData.username,
+      PhoneNumber: PhoneNumber || userData.PhoneNumber,
+      teacherPhoneNumber: teacherPhoneNumber || userData.teacherPhoneNumber,
+      whatsappNumber: whatsappNumber || userData.whatsappNumber,
+      standard: standard || userData.standard,
+      schoolName: schoolName || userData.schoolName,
+      country: country || userData.country,
+      state: state || userData.state,
+      city: city || userData.city,
+    };
+
+    // If password is being updated, hash it
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updatedData.password = hashedPassword;
+    }
+
+    // Save updated data in the database
+    await set(userRef, updatedData);
+
+    res.status(200).json({
+      message: "Student profile updated successfully.",
+      user: updatedData,
+    });
+  } catch (error) {
+    console.error("Error in student profile update/delete:", error.message);
+    res.status(500).json({
+      message: "Failed to update/delete student profile.",
+      error: error.message,
+    });
+  }
+};
 
 // Register User
 const registerUser = async (req, res) => {
@@ -355,6 +441,15 @@ const saveQuizMarks = async (req, res) => {
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const testId = `test-${timestamp}`;
 
+    // Fetch school name from user data
+    const userSnapshot = await get(ref(database, `gio-students/${uid}`));
+    if (!userSnapshot.exists()) {
+      return res.status(404).json({ message: "User not found." });
+    }
+    const userData = userSnapshot.val();
+    const schoolName = userData.schoolName || "Unknown School";
+    const userName = userData.name || "Unknown";
+
     // Save marks to user-specific node
     const marksRef = ref(
       database,
@@ -366,11 +461,10 @@ const saveQuizMarks = async (req, res) => {
     const maxScore = type === "mock" ? 100 : 400;
     await updateUserRankings(uid, scoreNum, type, maxScore);
 
-    // Fetch updated rankings and user data
-    const [rankingsSnapshot, userSnapshot] = await Promise.all([
-      get(ref(database, `gio-students/${uid}/ranks/${type}`)),
-      get(ref(database, `gio-students/${uid}`)),
-    ]);
+    // Fetch updated rankings
+    const rankingsSnapshot = await get(
+      ref(database, `gio-students/${uid}/ranks/${type}`)
+    );
 
     if (!rankingsSnapshot.exists()) {
       return res.status(200).json({
@@ -384,8 +478,6 @@ const saveQuizMarks = async (req, res) => {
     }
 
     const userRankings = rankingsSnapshot.val();
-    const userData = userSnapshot.val();
-    const userName = userData.name || "Unknown";
 
     // Handle live test certificate generation
     if (type === "live" && totalNum === 400) {
@@ -396,6 +488,7 @@ const saveQuizMarks = async (req, res) => {
       const certificateData = {
         code: certificateCode,
         name: userName,
+        schoolName, // Include school name in certificate data
         rankings: {
           global: userRankings.global,
           country: userRankings.country,
@@ -419,12 +512,14 @@ const saveQuizMarks = async (req, res) => {
         createdAt: certificateData.timestamp,
         type: "GQC",
         user: userName,
+        schoolName, // Save school name globally
       });
 
       return res.status(200).json({
         message: "Live test saved and certificate updated successfully.",
         certificateCode,
         name: userName,
+        schoolname: schoolName,
         rankings: userRankings,
         timestamp: certificateData.timestamp,
       });
@@ -476,7 +571,6 @@ const updateUserRankings = async (uid, score, type, maxScore) => {
 
   // Fetch and log the updated rankings to verify
   const updatedRankingsSnapshot = await get(rankingsRef);
- 
 };
 
 // Get User Rankings
@@ -639,11 +733,14 @@ const verifyCertificateCode = async (req, res) => {
     // Search for the certificate code within 'certificateCodes'
     let certificateData = null;
     let studentName = null;
+    let schoolName = null;
+
     snapshot.forEach((childSnapshot) => {
       const studentData = childSnapshot.val();
       if (studentData.certificateCodes?.code === certificateCode) {
         certificateData = studentData.certificateCodes;
-        studentName = studentData.name; // Retrieve the associated name
+        studentName = studentData.name || "Unknown";
+        schoolName = studentData.schoolName || "Unknown School"; // Retrieve school name
       }
     });
 
@@ -653,11 +750,12 @@ const verifyCertificateCode = async (req, res) => {
       });
     }
 
-    // Return the certificate details along with the name
+    // Return the certificate details along with the name and school
     return res.status(200).json({
       message: "Certificate verified successfully",
       certificateCode: certificateData.code,
-      name: studentName, // Include the name in the response
+      name: studentName,
+      schoolname: schoolName, // Include school name in the response
       rankings: certificateData.rankings,
       timestamp: certificateData.timestamp,
     });
@@ -680,4 +778,5 @@ module.exports = {
   getTestCounts,
   getAllStudentsTestCounts,
   verifyCertificateCode,
+  updateUserProfile,
 };
