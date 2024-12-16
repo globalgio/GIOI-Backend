@@ -6,11 +6,11 @@ const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
 const userRoutes = require("./routes/userRoutes"); // Import user routes
 const adminRoutes = require("./routes/adminRoutes");
-const scoolRoutes =require("./routes/schoolRoutes")
+const scoolRoutes = require("./routes/schoolRoutes");
 const cookieParser = require("cookie-parser");
 const path = require("path");
 const razorPayment = require("./routes/razorpayRoutes");
-
+const coordinatorRoutes = require("./routes/coordinatorRoutes");
 // Load environment variables
 dotenv.config();
 
@@ -45,7 +45,8 @@ app.use("/static", express.static(path.join(__dirname, "public")));
 app.use("/api/gio", userRoutes); // Use the userRoutes for "/api/gio" path
 app.use("/api/payment", razorPayment); // Use the razorPayment
 app.use("/api/admin", adminRoutes); // Use the adminRoutes for "/api/admin" path
-app.use("/api/school",scoolRoutes); // Use the scoolRoute for "/api/school
+app.use("/api/school", scoolRoutes); // Use the scoolRoute for "/api/school
+app.use("/api/coordinator", coordinatorRoutes); // Use the teacher
 
 // Route to serve JSON files
 
