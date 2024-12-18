@@ -16,6 +16,7 @@ const {
   approveCoordinator,
   getPendingCoordinators,
   deleteCoordinator,
+  updateOrDeleteSchool,
 } = require("../controllers/admiController");
 const authenticateAdmin = require("../middleware/authAdmin");
 
@@ -46,7 +47,7 @@ router.post(
 );
 // Update student details
 router.post("/adminreq/students", authenticateAdmin, updateUserProfile);
-
+router.post("/schools/update-or-delete", updateOrDeleteSchool);
 // Get all coordinators route
 router.get("/coordinators", authenticateAdmin, getAllCoordinator);
 router.post("/coordinators/approve", authenticateAdmin, approveCoordinator);

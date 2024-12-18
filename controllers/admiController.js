@@ -574,43 +574,90 @@ const getPendingCoordinators = async (req, res) => {
       .filter((uid) => coordinators[uid].status === "pending")
       .map((uid) => ({ uid, ...coordinators[uid] }));
 
-    res
-      .status(200)
-      .json({
-        message: "Pending coordinators fetched successfully.",
-        coordinators: pendingCoordinators,
-      });
+    res.status(200).json({
+      message: "Pending coordinators fetched successfully.",
+      coordinators: pendingCoordinators,
+    });
   } catch (error) {
     console.error("Error fetching pending coordinators:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to fetch pending coordinators.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to fetch pending coordinators.",
+      error: error.message,
+    });
   }
 };
 const deleteCoordinator = async (req, res) => {
   const { uid } = req.body;
 
   if (!uid) {
-      return res.status(400).json({ message: "Coordinator UID is required" });
+    return res.status(400).json({ message: "Coordinator UID is required" });
   }
 
   try {
-      const coordinatorRef = ref(database, `coordinators/${uid}`);
-      const snapshot = await get(coordinatorRef);
+    const coordinatorRef = ref(database, `coordinators/${uid}`);
+    const snapshot = await get(coordinatorRef);
 
-      if (!snapshot.exists()) {
-          return res.status(404).json({ message: "Coordinator not found" });
-      }
+    if (!snapshot.exists()) {
+      return res.status(404).json({ message: "Coordinator not found" });
+    }
 
-      await remove(coordinatorRef);
+    await remove(coordinatorRef);
 
-      return res.status(200).json({ message: "Coordinator deleted successfully" });
+    return res
+      .status(200)
+      .json({ message: "Coordinator deleted successfully" });
   } catch (error) {
-      console.error("Error deleting coordinator:", error);
-      return res.status(500).json({ message: "Failed to delete coordinator", error: error.message });
+    console.error("Error deleting coordinator:", error);
+    return res
+      .status(500)
+      .json({ message: "Failed to delete coordinator", error: error.message });
+  }
+};
+const updateOrDeleteSchool = async (req, res) => {
+  const { uid, deleteSchool } = req.body; // Extract UID and delete flag
+  const { schoolName, principalName, email } = req.body; // Details for updating
+
+  if (!uid) {
+    return res.status(400).json({ message: "School UID is required" });
+  }
+
+  try {
+    const schoolRef = ref(database, `schools/${uid}`);
+    const snapshot = await get(schoolRef);
+
+    if (!snapshot.exists()) {
+      return res
+        .status(404)
+        .json({ message: "School not found in the database." });
+    }
+
+    // Handle School Deletion
+    if (deleteSchool) {
+      await remove(schoolRef); // Deletes the school record
+      return res
+        .status(200)
+        .json({ message: "School profile deleted successfully." });
+    }
+
+    // Handle School Update
+    const updatedData = {
+      schoolName: schoolName || snapshot.val().schoolName,
+      principalName: principalName || snapshot.val().principalName,
+      email: email || snapshot.val().email,
+    };
+
+    await update(schoolRef, updatedData);
+
+    return res.status(200).json({
+      message: "School details updated successfully.",
+      school: updatedData,
+    });
+  } catch (error) {
+    console.error("Error in school update/delete:", error.message);
+    return res.status(500).json({
+      message: "Failed to update/delete school.",
+      error: error.message,
+    });
   }
 };
 
@@ -628,5 +675,6 @@ module.exports = {
   getAllCoordinator,
   approveCoordinator,
   getPendingCoordinators,
-  deleteCoordinator 
+  deleteCoordinator,
+  updateOrDeleteSchool,
 };

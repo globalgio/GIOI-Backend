@@ -4,58 +4,54 @@ const cors = require("cors");
 const helmet = require("helmet");
 const bodyParser = require("body-parser");
 const dotenv = require("dotenv");
-const userRoutes = require("./routes/userRoutes"); // Import user routes
+const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const scoolRoutes = require("./routes/schoolRoutes");
 const cookieParser = require("cookie-parser");
+
 const path = require("path");
 const razorPayment = require("./routes/razorpayRoutes");
 const coordinatorRoutes = require("./routes/coordinatorRoutes");
+
+
+
 // Load environment variables
 dotenv.config();
 
-// Initialize Express app
 const app = express();
+
+// Set PORT from environment or default to 5002
 const PORT = process.env.PORT || 5002;
 
 // Middleware
-app.use(helmet()); // Adds security headers
+app.use(helmet());
 const corsOptions = {
-  origin: "*", // Allow all origins
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS", // Allow all methods
+  origin: "*",
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS",
   allowedHeaders:
-    "Origin, X-Requested-With, Content-Type, Accept, Authorization", // Allow all headers
-  credentials: true, // Allow credentials
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  credentials: true,
 };
-
-// Apply CORS middleware
 app.use(cors(corsOptions));
-
-// Preflight request handling
 app.options("*", cors(corsOptions));
-
-app.use(cookieParser()); // Enables cookie parsing for authentication tokens
-app.use(bodyParser.json()); // Parses JSON requests
-app.use(bodyParser.urlencoded({ extended: true })); // Parses URL-encoded data
-
-// Serve static files from the public folder
+app.use(cookieParser());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use("/static", express.static(path.join(__dirname, "public")));
 
 // Define API routes
-app.use("/api/gio", userRoutes); // Use the userRoutes for "/api/gio" path
-app.use("/api/payment", razorPayment); // Use the razorPayment
-app.use("/api/admin", adminRoutes); // Use the adminRoutes for "/api/admin" path
-app.use("/api/school", scoolRoutes); // Use the scoolRoute for "/api/school
-app.use("/api/coordinator", coordinatorRoutes); // Use the teacher
+app.use("/api/gio", userRoutes);
+app.use("/api/payment", razorPayment);
+app.use("/api/admin", adminRoutes);
+app.use("/api/school", scoolRoutes);
+app.use("/api/coordinator", coordinatorRoutes);
 
-// Route to serve JSON files
-
-// Start the server
-
-app.listen(PORT, () => {
-  debug(`Server is running on http://localhost:${PORT}`);
-});
-
+// Default route
 app.get("/", (req, res) => {
   res.send("Server is running");
+});
+
+// Start the server (use `server.listen` for WebSocket compatibility)
+app.listen(PORT, () => {
+  debug(`Server is running on http://localhost:${PORT}`);
 });
