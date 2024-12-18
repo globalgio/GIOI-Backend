@@ -5,17 +5,14 @@ const {
   coordinatorLogin,
   updateProfile,
   getProfile,
-  updateCoordinatorDetails,
   bulkUploadStudents,
   getStudentsByCoordinator,
   calculateIncentives,
   getPartnerRank,
   verifyCoordinatorDetails,
   getLeaderboard,
-  verifyUpiOtp,
   getAchievements,
   updateStudentPaymentStatus,
-  sendUpiOtp,
   getCoordinatorTestCounts,
 } = require("../controllers/coordinatorController");
 const coordinatorAuth = require("../middleware/coordinatorAuth");
@@ -40,8 +37,6 @@ router.post(
 );
 router.get("/students", coordinatorAuth, getStudentsByCoordinator);
 
-router.put("/update-profile", coordinatorAuth, updateProfile);
-
 // Verification Endpoint
 router.post("/verify-details", coordinatorAuth, verifyCoordinatorDetails);
 
@@ -54,9 +49,5 @@ router.get("/leaderboard", coordinatorAuth, getLeaderboard);
 router.get("/achievements", coordinatorAuth, getAchievements);
 
 router.get("/test-counts", coordinatorAuth, getCoordinatorTestCounts);
-
-// UPI OTP Routes
-router.post("/send-upi-otp", coordinatorAuth, sendUpiOtp);
-router.post("/verify-upi-otp", coordinatorAuth, verifyUpiOtp);
 
 module.exports = router;

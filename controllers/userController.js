@@ -1,6 +1,6 @@
 const { database } = require("../config/firebase-config");
 
-const { ref, set, get,remove } = require("firebase/database");
+const { ref, set, get, remove, push } = require("firebase/database");
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
@@ -768,6 +768,37 @@ const verifyCertificateCode = async (req, res) => {
   }
 };
 
+// // Save Request Callback Details
+const requestCallback = async (req, res) => {
+  const { name, mobile, message } = req.body;
+
+  if (!name || !mobile || !message) {
+    return res
+      .status(400)
+      .json({ error: "Name, mobile, and message are required." });
+  }
+
+  try {
+    // Save data to Firebase under "RequestCallback" node
+    const callbackRef = ref(database, "RequestCallback/");
+    const newRequestRef = push(callbackRef);
+
+    await set(newRequestRef, {
+      name,
+      mobile,
+      message,
+      createdAt: new Date().toISOString(),
+    });
+
+    return res
+      .status(200)
+      .json({ message: "Request callback saved successfully!" });
+  } catch (error) {
+    console.error("Error saving request callback:", error);
+    return res.status(500).json({ error: "Failed to save request callback." });
+  }
+};
+
 module.exports = {
   registerUser,
   loginUser,
@@ -779,4 +810,5 @@ module.exports = {
   getAllStudentsTestCounts,
   verifyCertificateCode,
   updateUserProfile,
+  requestCallback,
 };

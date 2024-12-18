@@ -9,7 +9,8 @@ const {
   getTestCounts,
   getAllStudentsTestCounts,
   updateUserProfile,
-  verifyCertificateCode
+  verifyCertificateCode,
+  requestCallback
 } = require("../controllers/userController");
 const { verifyToken } = require("../middleware/verifyToken");
 
@@ -41,6 +42,7 @@ router.get(
 
 // Route to verify a certificate code
 router.post('/verify', verifyCertificateCode);
+router.post('/request-callback', requestCallback);
 router.post("/update-profile", verifyToken, updateUserProfile);
 
 module.exports = router;

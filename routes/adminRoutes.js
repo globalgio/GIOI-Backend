@@ -5,12 +5,17 @@ const {
   adminLogin,
   registerAdmin,
   getAllStudents,
+  generateRefCode,
+  validateRefCode,
   viewRefCodes,
   getAllSchools,
-  validateRefCode,
-  generateRefCode,
   getApprovedCoordinators,
   bulkUploadStudents,
+  updateUserProfile,
+  getAllCoordinator,
+  approveCoordinator,
+  getPendingCoordinators,
+  deleteCoordinator,
 } = require("../controllers/admiController");
 const authenticateAdmin = require("../middleware/authAdmin");
 
@@ -39,4 +44,13 @@ router.post(
   authenticateAdmin,
   bulkUploadStudents
 );
+// Update student details
+router.post("/adminreq/students", authenticateAdmin, updateUserProfile);
+
+// Get all coordinators route
+router.get("/coordinators", authenticateAdmin, getAllCoordinator);
+router.post("/coordinators/approve", authenticateAdmin, approveCoordinator);
+router.delete("/coordinators/delete", authenticateAdmin, deleteCoordinator);
+router.get("/coordinators/pending", getPendingCoordinators);
+router.get("/coordinators/approved", getApprovedCoordinators);
 module.exports = router;

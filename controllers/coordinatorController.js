@@ -1,5 +1,3 @@
-// controllers/coordinatorController.js
-
 const {
   getAuth,
   createUserWithEmailAndPassword,
@@ -11,6 +9,7 @@ const {
   set,
   get,
   update,
+  child,
   query,
   orderByChild,
   equalTo,
@@ -23,15 +22,12 @@ const bcrypt = require("bcrypt");
 const { v4: uuidv4 } = require("uuid");
 const axios = require("axios"); // Ensure axios is imported
 const { updateData, getData } = require("../utils/database");
-const { sendEmail } = require("../utils/sendEmail");
-const { generateOtp, generateTransactionId } = require("../utils/generateOtp");
 const { app } = require("../config/firebase-config");
 const auth = getAuth(app);
+const { sendEmail } = require("../utils/sendEmail");
 const database = getDatabase(app);
-const isValidIFSC = (ifsc) => {
-  const regex = /^[A-Za-z]{4}0[A-Za-z0-9]{6}$/;
-  return regex.test(ifsc);
-};
+const { registrationEmailTemplate } = require("../utils/templateEmail");
+require("dotenv").config();
 
 /**
  * Categories and Incentives Config
@@ -82,20 +78,24 @@ function calculateEngagementBonus(practiceTestsAttempted) {
 /**
  * Coordinator Registration
  */
+// Email validation function
 
+/**
+ * Coordinator Registration
+ */
 const coordinatorRegister = async (req, res) => {
   const {
     email,
-    password,
     phoneNumber,
     whatsappNumber,
     country,
     state,
     city,
     name,
+    password,
   } = req.body;
 
-  // Validate required fields
+  // Input Validation
   if (
     !email ||
     !password ||
@@ -109,29 +109,17 @@ const coordinatorRegister = async (req, res) => {
     return res.status(400).json({ error: "All fields are required." });
   }
 
-  // Validate email format
-  if (!validateEmail(email)) {
-    return res.status(400).json({ error: "Invalid email format." });
-  }
-
-  // Validate password length
-  if (password.length < 8) {
-    return res
-      .status(400)
-      .json({ error: "Password must be at least 8 characters." });
-  }
-
   try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const userId = userCredential.user.uid;
-    const userRef = ref(database, `coordinators/${userId}`);
+    // Check if the user already exists in the database
+    const userRef = ref(database, "coordinators");
+    const snapshot = await get(child(userRef, email.replace(/[@.]/g, "_"))); // Replace invalid chars
 
-    // Initialize coordinator data with standardized field names
-    await set(userRef, {
+    if (snapshot.exists()) {
+      return res.status(400).json({ error: "Coordinator already exists." });
+    }
+
+    const userId = email.replace(/[@.]/g, "_"); // Simple unique ID using email
+    const userData = {
       email,
       phoneNumber,
       whatsappNumber,
@@ -139,36 +127,52 @@ const coordinatorRegister = async (req, res) => {
       state,
       city,
       name,
+      password, // Store plain text password (not recommended for production, hash it!)
       role: "coordinator",
+      status: "pending",
       createdAt: new Date().toISOString(),
       category: "Starter Partner",
       totalStudents: 0,
       totalPaidStudents: 0,
       totalIncentives: 0,
-      bonusAmount: 0, // Initialize Bonus Amount
-      totalEarnings: 0, // Initialize Total Earnings
-    });
+      bonusAmount: 0,
+      totalEarnings: 0,
+    };
 
+    // Add user data to Realtime Database
+    await set(ref(database, `coordinators/${userId}`), userData);
+
+    // Generate a JWT token for the coordinator
     const token = jwt.sign(
-      { userId, email, role: "coordinator" },
+      { userId, email, role: "coordinator", status: "pending" },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "30d" }
     );
 
-    res.status(200).json({
+    // Send registration confirmation email
+    const mailOptions = {
+      from: process.env.MAIL_USER,
+      to: email,
+      subject: "Welcome to Global Innovator Olympiad!",
+      html: registrationEmailTemplate(name),
+    };
+
+    await sendEmail(mailOptions);
+
+    res.status(201).json({
       message: "Coordinator registered successfully!",
       token,
-      data: { userId, email, role: "coordinator" },
+      data: { userId, email, role: "coordinator", status: "pending" },
     });
   } catch (error) {
-    console.error("Error during registration:", error);
-    if (error.code === "auth/email-already-in-use") {
-      return res.status(400).json({ error: "Email is already in use." });
-    }
-    res.status(500).json({ error: error.message || "Internal Server Error" });
+    console.error("Error registering coordinator:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };
 
+/**
+ * Coordinator Login
+ */
 /**
  * Coordinator Login
  */
@@ -186,39 +190,65 @@ const coordinatorLogin = async (req, res) => {
   }
 
   try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
-    const userId = userCredential.user.uid;
+    // Generate userId from email (replace invalid characters)
+    const userId = email.replace(/[@.]/g, "_");
     const userRef = ref(database, `coordinators/${userId}`);
     const snapshot = await get(userRef);
 
+    // Check if user exists
     if (!snapshot.exists()) {
       return res.status(404).json({ error: "User not found." });
     }
 
+    const coordinatorData = snapshot.val();
+
+    // Compare provided password with hashed password
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      coordinatorData.password
+    );
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: "Incorrect password." });
+    }
+
+    // Check if coordinator is approved
+    if (coordinatorData.status !== "approved") {
+      return res
+        .status(403)
+        .json({ error: "Account pending approval by admin." });
+    }
+
+    // Generate JWT token
     const token = jwt.sign(
-      { userId, email, role: "coordinator" },
+      { userId, email, role: "coordinator", status: coordinatorData.status },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "30d" }
     );
+
     res.status(200).json({
       message: "Login successful!",
       token,
-      data: { userId, email, role: "coordinator" },
+      data: {
+        userId,
+        email,
+        role: "coordinator",
+        status: coordinatorData.status,
+      },
     });
   } catch (error) {
     console.error("Error during login:", error);
-    if (error.code === "auth/wrong-password") {
-      return res.status(400).json({ error: "Incorrect password." });
-    }
-    if (error.code === "auth/user-not-found") {
-      return res.status(400).json({ error: "User not found." });
-    }
-    res.status(500).json({ error: error.message || "Internal Server Error" });
+    res.status(500).json({ error: "Internal Server Error" });
   }
+};
+
+/**
+ * Update Coordinator Profile
+ */
+// Helper function to validate IFSC code format
+// Helper function to validate IFSC code format
+const isValidIFSC = (ifsc) => {
+  const regex = /^[A-Za-z]{4}0[A-Za-z0-9]{6}$/;
+  return regex.test(ifsc);
 };
 
 /**
@@ -308,15 +338,21 @@ const bulkUploadStudents = async (req, res) => {
   }
 
   try {
+    console.log("Processing file:", req.file.path);
+
+    // Read uploaded Excel file
     const workbook = xlsx.readFile(req.file.path);
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
+
+    // Convert sheet data to JSON
     const students = xlsx.utils.sheet_to_json(sheet);
 
     let failedEntries = [];
     let successCount = 0;
     const coordinatorId = req.user.userId;
 
+    // Iterate through each student and process
     for (const student of students) {
       try {
         // Validate required fields
@@ -333,11 +369,14 @@ const bulkUploadStudents = async (req, res) => {
           !student.state ||
           !student.city
         ) {
-          failedEntries.push({ student, reason: "Missing required fields" });
+          failedEntries.push({
+            student,
+            reason: "Missing required fields",
+          });
           continue;
         }
 
-        // Validate scores if present
+        // Validate mockScore and liveScore (optional but recommended)
         if (
           student.mockScore !== undefined &&
           (typeof student.mockScore !== "number" ||
@@ -366,9 +405,11 @@ const bulkUploadStudents = async (req, res) => {
           continue;
         }
 
-        // Hash the password
-        const hashedPassword = await bcrypt.hash(student.password, 10);
-        const uid = uuidv4();
+        // Hash the password before saving
+        const hashedPassword = await bcrypt.hash(student.password, 10); // Hash with salt rounds
+
+        // Generate a unique ID for the user
+        const uid = uuidv4(); // Generate UID for each student
 
         // Save student data with standardized field names
         const studentData = {
@@ -396,6 +437,61 @@ const bulkUploadStudents = async (req, res) => {
         const studentRef = ref(database, `gio-students/${uid}`);
         await set(studentRef, studentData);
 
+        // Generate JWT token for the student after registration (optional)
+        const token = jwt.sign(
+          { uid, username: student.username, name: student.name },
+          process.env.JWT_SECRET_KEY,
+          { expiresIn: "1d" }
+        );
+
+        // Process predefined mockScore
+        if (student.mockScore !== undefined && student.mockScore !== null) {
+          try {
+            const mockResult = await saveQuizMarks({
+              user: { uid },
+              body: {
+                score: student.mockScore,
+                total: 100, // Assuming mock tests are out of 100
+                type: "mock",
+              },
+            });
+            console.log(
+              `Mock test processed for UID: ${uid}`,
+              mockResult.message
+            );
+          } catch (error) {
+            console.error(
+              `Error saving mock test marks for UID: ${uid}:`,
+              error.message
+            );
+            throw new Error(`Mock test mark saving failed: ${error.message}`);
+          }
+        }
+
+        // Process predefined liveScore
+        if (student.liveScore !== undefined && student.liveScore !== null) {
+          try {
+            const liveResult = await saveQuizMarks({
+              user: { uid },
+              body: {
+                score: student.liveScore,
+                total: 400, // Assuming live tests are out of 400
+                type: "live",
+              },
+            });
+            console.log(
+              `Live test processed for UID: ${uid}`,
+              liveResult.message
+            );
+          } catch (error) {
+            console.error(
+              `Error saving live test marks for UID: ${uid}:`,
+              error.message
+            );
+            throw new Error(`Live test mark saving failed: ${error.message}`);
+          }
+        }
+
         // Update Rankings (Assuming you have global rankings data)
         // Placeholder implementation; replace with actual logic
         const globalMockRanksData = {}; // Fetch or define as needed
@@ -420,10 +516,12 @@ const bulkUploadStudents = async (req, res) => {
 
         successCount++;
       } catch (error) {
+        console.error("Error processing student:", error.message);
         failedEntries.push({ student, reason: error.message });
       }
     }
 
+    // Remove the uploaded file after processing
     fs.unlinkSync(req.file.path);
 
     // Update coordinator totalStudents count
@@ -436,15 +534,17 @@ const bulkUploadStudents = async (req, res) => {
     }
 
     res.status(200).json({
-      message: "Bulk upload completed with rankings updated.",
+      message: "Bulk upload completed with rankings and quiz marks updated.",
       successCount,
       failedCount: failedEntries.length,
       failedEntries,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Bulk upload failed.", error: error.message });
+    console.error("Error in bulk upload:", error);
+    res.status(500).json({
+      message: "Bulk upload failed.",
+      error: error.message,
+    });
   }
 };
 
@@ -488,39 +588,12 @@ const getStudentsByCoordinator = async (req, res) => {
 };
 
 /**
- * Update Coordinator Details
- */
-const updateCoordinatorDetails = async (req, res) => {
-  const { userId } = req.user;
-  const { bankName, accountNumber, ifsc, branch, upiId } = req.body;
-
-  if (!userId) {
-    return res.status(400).json({ error: "User ID not found in token." });
-  }
-
-  try {
-    await updateData(`coordinators/${userId}`, {
-      bankName: bankName || "",
-      accountNumber: accountNumber || "",
-      ifsc: ifsc || "",
-      branch: branch || "",
-      upiId: upiId || "",
-      updatedAt: new Date().toISOString(),
-    });
-
-    res.status(200).json({ message: "Details updated successfully!" });
-  } catch (error) {
-    console.error("Error updating coordinator details:", error);
-    res.status(500).json({ error: "Failed to update details." });
-  }
-};
-
-/**
  * Calculate Incentives for a Coordinator
  * This endpoint recalculates the category and incentives based on current data.
  */
 const calculateIncentives = async (req, res) => {
   const { userId } = req.user;
+  console.log("userId: ", userId);
 
   try {
     // Get coordinator info
@@ -756,7 +829,7 @@ const getLeaderboard = async (req, res) => {
 
     const allCoordinators = snapshot.val();
 
-    // Convert to an array and sort by totalEarnings descending
+    // Convert to an array, include status, and filter only approved coordinators
     const leaderboard = Object.keys(allCoordinators)
       .map((key) => ({
         userId: key,
@@ -765,9 +838,11 @@ const getLeaderboard = async (req, res) => {
         totalIncentives: allCoordinators[key].totalIncentives || 0,
         bonusAmount: allCoordinators[key].bonusAmount || 0,
         totalEarnings: allCoordinators[key].totalEarnings || 0,
+        status: allCoordinators[key].status || "pending", // Default to 'pending' if status is undefined
       }))
-      .sort((a, b) => (b.totalEarnings || 0) - (a.totalEarnings || 0)) // Sort by totalEarnings
-      .slice(0, 10); // Top 10
+      .filter((coordinator) => coordinator.status.toLowerCase() === "approved") // Filter only approved
+      .sort((a, b) => (b.totalEarnings || 0) - (a.totalEarnings || 0)) // Sort by totalEarnings descending
+      .slice(0, 10); // Select top 10
 
     res.status(200).json({ leaderboard });
   } catch (error) {
@@ -922,99 +997,6 @@ function getRankAndCategory(score, ranksData, maxScore) {
     category: "A+", // Example category
   };
 }
-// controllers/coordinatorController.js
-
-// Verify Coordinator Details (Bank Verification)
-
-// Send UPI OTP
-const sendUpiOtp = async (req, res) => {
-  const { userId } = req.user;
-  const { upiId, email } = req.body;
-
-  if (!userId || !upiId || !email) {
-    return res
-      .status(400)
-      .json({ error: "User ID, UPI ID, and email are required." });
-  }
-
-  try {
-    // Validate UPI ID format
-    const upiIdRegex = /^[\w.-]{2,256}@[a-zA-Z]{2,64}$/;
-    if (!upiIdRegex.test(upiId)) {
-      return res.status(400).json({ error: "Invalid UPI ID format." });
-    }
-
-    // Generate OTP and Transaction ID
-    const otp = generateOtp();
-    const transactionId = generateTransactionId();
-
-    // Store OTP and transactionId in the database associated with the user
-    await updateData(`coordinators/${userId}`, {
-      upiOtp: otp,
-      upiTransactionId: transactionId,
-      upiId, // Ensure UPI ID is stored
-    });
-
-    // Send OTP via email using Nodemailer
-    const mailOptions = {
-      from: process.env.MAIL_USER,
-      to: email, // User's email
-      subject: "Your UPI OTP",
-      text: `Your OTP for UPI verification is ${otp}. Use this to verify your UPI ID.`,
-    };
-
-    await sendEmail(mailOptions);
-
-    res.status(200).json({
-      message: "OTP sent successfully to your email.",
-      transactionId,
-    });
-  } catch (error) {
-    console.error("Error sending UPI OTP:", error);
-    res.status(500).json({ error: "Failed to send OTP." });
-  }
-};
-
-// Verify UPI OTP
-const verifyUpiOtp = async (req, res) => {
-  const { userId } = req.user;
-  const { transactionId, otp } = req.body;
-
-  if (!userId || !transactionId || !otp) {
-    return res
-      .status(400)
-      .json({ error: "User ID, transaction ID, and OTP are required." });
-  }
-
-  try {
-    // Retrieve stored OTP and Transaction ID from the database
-    const userData = await getData(`coordinators/${userId}`);
-
-    if (
-      !userData ||
-      userData.upiOtp !== otp ||
-      userData.upiTransactionId !== transactionId
-    ) {
-      return res.status(400).json({ error: "Invalid OTP or Transaction ID." });
-    }
-
-    // OTP is valid, update UPI verification status
-    await updateData(`coordinators/${userId}`, {
-      upiVerified: true,
-      updatedAt: new Date().toISOString(),
-      // Optionally, remove OTP fields
-      upiOtp: null,
-      upiTransactionId: null,
-    });
-
-    res.status(200).json({ message: "UPI verification successful." });
-  } catch (error) {
-    console.error("Error verifying UPI OTP:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-// Update Coordinator Details without Verification
 
 module.exports = {
   coordinatorRegister,
@@ -1023,13 +1005,9 @@ module.exports = {
   getProfile,
   bulkUploadStudents,
   getStudentsByCoordinator,
-  updateCoordinatorDetails,
   calculateIncentives,
   getPartnerRank,
   verifyCoordinatorDetails,
-  sendUpiOtp,
-  verifyUpiOtp,
-  updateCoordinatorDetails,
   getLeaderboard,
   getAchievements,
   getCoordinatorTestCounts,

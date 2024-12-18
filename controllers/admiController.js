@@ -1,14 +1,15 @@
+const bcrypt = require("bcrypt");
 const { auth, database } = require("../config/firebase-config");
 const {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
 } = require("firebase/auth");
-const { ref, set, get, child } = require("firebase/database");
+const { ref, set, get, remove, child, update } = require("firebase/database");
 const jwt = require("jsonwebtoken");
 const { v4: uuidv4 } = require("uuid");
 const xlsx = require("xlsx");
 const fs = require("fs");
-require("dotenv").config();``
+require("dotenv").config();
 
 // Admin Login
 const adminLogin = async (req, res) => {
@@ -109,14 +110,12 @@ const registerAdmin = async (req, res) => {
       { expiresIn: "30d" }
     );
 
-    res
-      .status(201)
-      .json({
-        message: "Admin registered successfully",
-        uid: user.uid,
-        email: user.email,
-        token,
-      });
+    res.status(201).json({
+      message: "Admin registered successfully",
+      uid: user.uid,
+      email: user.email,
+      token,
+    });
   } catch (error) {
     console.error("Error registering admin:", error);
     res
@@ -135,14 +134,12 @@ const getAllStudents = async (req, res) => {
       const students = snapshot.val();
       const formattedStudents = Object.keys(students).map((uid) => ({
         uid,
-        ...students[uid],
+        ...students[uid], // Include all nested data
       }));
-      res
-        .status(200)
-        .json({
-          message: "Students fetched successfully",
-          students: formattedStudents,
-        });
+      res.status(200).json({
+        message: "Students fetched successfully",
+        students: formattedStudents,
+      });
     } else {
       res.status(404).json({ message: "No students found" });
     }
@@ -246,12 +243,10 @@ const getAllSchools = async (req, res) => {
         uid,
         ...school[uid],
       }));
-      res
-        .status(200)
-        .json({
-          message: "school fetched successfully",
-          school: formattedSchools,
-        });
+      res.status(200).json({
+        message: "school fetched successfully",
+        school: formattedSchools,
+      });
     } else {
       res.status(404).json({ message: "No school found" });
     }
@@ -277,20 +272,16 @@ const getApprovedCoordinators = async (req, res) => {
       .filter((uid) => coordinators[uid].status === "approved")
       .map((uid) => ({ uid, ...coordinators[uid] }));
 
-    res
-      .status(200)
-      .json({
-        message: "approved coordinators fetched successfully.",
-        coordinators: pendingCoordinators,
-      });
+    res.status(200).json({
+      message: "approved coordinators fetched successfully.",
+      coordinators: pendingCoordinators,
+    });
   } catch (error) {
     console.error("Error fetching approved coordinators:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to fetch approved coordinators.",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Failed to fetch approved coordinators.",
+      error: error.message,
+    });
   }
 };
 
@@ -305,86 +296,101 @@ const bulkUploadStudents = async (req, res) => {
     const sheetName = workbook.SheetNames[0];
     const sheet = workbook.Sheets[sheetName];
 
-    // Convert Excel sheet data to JSON
+    // Convert sheet data to JSON
     const students = xlsx.utils.sheet_to_json(sheet);
 
-    let failedEntries = [];
-    let successCount = 0;
+    // Helper function to process and upload in batches
+    const batchProcessStudents = async (studentsBatch) => {
+      let failedEntries = [];
+      let successCount = 0;
+      const batchUpdates = {}; // This will store all batch updates
 
-    // Process each student entry
-    for (const student of students) {
-      try {
-        // Validate required fields
-        if (
-          !student.name ||
-          !student.username ||
-          !student.password ||
-          !student.PhoneNumber ||
-          !student.teacherPhoneNumber ||
-          !student.whatsappNumber ||
-          !student.standard ||
-          !student.schoolName ||
-          !student.country ||
-          !student.state ||
-          !student.city
-        ) {
-          failedEntries.push({
-            student,
-            reason: "Missing required fields",
-          });
-          continue;
+      for (const student of studentsBatch) {
+        try {
+          // Validate required fields
+          if (
+            !student.name ||
+            !student.username ||
+            !student.password ||
+            !student.PhoneNumber ||
+            !student.teacherPhoneNumber ||
+            !student.whatsappNumber ||
+            !student.standard ||
+            !student.schoolName ||
+            !student.country ||
+            !student.state ||
+            !student.city
+          ) {
+            failedEntries.push({
+              student,
+              reason: "Missing required fields",
+            });
+            continue;
+          }
+
+          // Hash the password before saving
+          const hashedPassword = await bcrypt.hash(student.password, 10);
+          const uid = uuidv4(); // Generate a valid UID
+
+          // Prepare the student data for batch update
+          batchUpdates[`gio-students/${uid}`] = {
+            name: student.name,
+            username: student.username,
+            password: hashedPassword,
+            PhoneNumber: student.PhoneNumber,
+            teacherPhoneNumber: student.teacherPhoneNumber,
+            whatsappNumber: student.whatsappNumber,
+            standard: student.standard,
+            schoolName: student.schoolName,
+            country: student.country,
+            state: student.state,
+            city: student.city,
+            paymentStatus: "unpaid",
+            testCompleted: false,
+            ranks: {},
+            createdAt: new Date().toISOString(),
+          };
+
+          successCount++;
+        } catch (error) {
+          console.error("Error processing student:", error.message);
+          failedEntries.push({ student, reason: error.message });
         }
-
-        // Hash the password before saving
-        const hashedPassword = await bcrypt.hash(student.password, 10);
-
-        // Generate a unique ID for the student
-        const uid = uuidv4();
-
-        // Save the student data to Firebase Realtime Database
-        const userRef = ref(database, `gio-students/${uid}`);
-        await set(userRef, {
-          name: student.name,
-          username: student.username,
-          password: hashedPassword,
-          PhoneNumber: student.PhoneNumber,
-          teacherPhoneNumber: student.teacherPhoneNumber,
-          whatsappNumber: student.whatsappNumber,
-          standard: student.standard,
-          schoolName: student.schoolName,
-          country: student.country,
-          state: student.state,
-          city: student.city,
-          paymentStatus: "unpaid",
-          testCompleted: false,
-          ranks: {},
-          createdAt: new Date().toISOString(),
-        });
-
-        // Generate a JWT token for the student
-        const token = jwt.sign(
-          { uid, username: student.username, name: student.name },
-          process.env.JWT_SECRET_KEY,
-          { expiresIn: "1d" }
-        );
-
-        successCount++;
-        student.token = token; // Include token in response
-      } catch (error) {
-        console.error("Error processing student:", error.message);
-        failedEntries.push({ student, reason: error.message });
       }
+
+      // Perform batch update using update()
+      if (Object.keys(batchUpdates).length > 0) {
+        await update(ref(database), batchUpdates);
+      }
+
+      return { successCount, failedEntries };
+    };
+
+    // Split the students into batches (e.g., 50 students per batch)
+    const batchSize = 50;
+    const studentBatches = [];
+    for (let i = 0; i < students.length; i += batchSize) {
+      studentBatches.push(students.slice(i, i + batchSize));
     }
 
-    // Delete the uploaded file after processing
+    // Process each batch sequentially
+    let totalSuccessCount = 0;
+    let totalFailedEntries = [];
+    for (const batch of studentBatches) {
+      const { successCount, failedEntries } = await batchProcessStudents(batch);
+      totalSuccessCount += successCount;
+      totalFailedEntries = [...totalFailedEntries, ...failedEntries];
+    }
+
+    // Remove the uploaded file after processing
     fs.unlinkSync(req.file.path);
 
-    // Send response
+    // Return the result
     res.status(200).json({
       message: "Bulk upload completed",
-      successCount,
-      failedCount: failedEntries.length,
-      failedEntries,
+      successCount: totalSuccessCount,
+      failedCount: totalFailedEntries.length,
+      failedEntries: totalFailedEntries,
     });
   } catch (error) {
     console.error("Error in bulk upload:", error);
@@ -392,6 +398,219 @@ const bulkUploadStudents = async (req, res) => {
       message: "Failed to upload students",
       error: error.message,
     });
+  }
+};
+
+// Update or Delete Student Profile
+const updateUserProfile = async (req, res) => {
+  const { uid, deleteAccount } = req.body; // Extract UID and delete flag
+
+  if (!uid) {
+    return res.status(400).json({ message: "Student UID is required." });
+  }
+
+  try {
+    const userRef = ref(database, `gio-students/${uid}`);
+    const snapshot = await get(userRef);
+
+    if (!snapshot.exists()) {
+      return res
+        .status(404)
+        .json({ message: "Student not found in the database." });
+    }
+
+    // Handle Account Deletion
+    if (deleteAccount) {
+      await remove(userRef); // Deletes the student record
+      return res
+        .status(200)
+        .json({ message: "Student account deleted successfully." });
+    }
+
+    // Handle Profile Update
+    const {
+      name,
+      username,
+      password,
+      confirmPassword,
+      PhoneNumber,
+      teacherPhoneNumber,
+      whatsappNumber,
+      standard,
+      schoolName,
+      country,
+      state,
+      city,
+    } = req.body;
+
+    const userData = snapshot.val(); // Fetch existing user data
+
+    // Validate passwords match (if provided)
+    if (password && confirmPassword && password !== confirmPassword) {
+      return res.status(400).json({ message: "Passwords do not match." });
+    }
+
+    // Prepare updated data, retaining existing data for fields not provided
+    const updatedData = {
+      ...userData,
+      name: name || userData.name,
+      username: username || userData.username,
+      PhoneNumber: PhoneNumber || userData.PhoneNumber,
+      teacherPhoneNumber: teacherPhoneNumber || userData.teacherPhoneNumber,
+      whatsappNumber: whatsappNumber || userData.whatsappNumber,
+      standard: standard || userData.standard,
+      schoolName: schoolName || userData.schoolName,
+      country: country || userData.country,
+      state: state || userData.state,
+      city: city || userData.city,
+    };
+
+    // If password is provided, hash and update it
+    if (password) {
+      const hashedPassword = await bcrypt.hash(password, 10);
+      updatedData.password = hashedPassword;
+    }
+
+    // Save updated data back to the database
+    await set(userRef, updatedData);
+
+    return res.status(200).json({
+      message: "Student profile updated successfully.",
+      user: updatedData,
+    });
+  } catch (error) {
+    console.error("Error in student profile update/delete:", error.message);
+    return res.status(500).json({
+      message: "Failed to update/delete student profile.",
+      error: error.message,
+    });
+  }
+};
+const getAllCoordinator = async (req, res) => {
+  try {
+    const coordinatorsRef = ref(database, "coordinators/");
+    const snapshot = await get(coordinatorsRef);
+
+    if (snapshot.exists()) {
+      const coordinator = snapshot.val();
+      const formattedCoordinators = Object.keys(coordinator).map((uid) => ({
+        uid,
+        ...coordinator[uid],
+      }));
+      res.status(200).json({
+        message: "Coordinators fetched successfully",
+        coordinators: formattedCoordinators,
+      });
+    } else {
+      res.status(404).json({ message: "No coordinators found" });
+    }
+  } catch (error) {
+    console.error("Error fetching coordinators:", error);
+    res
+      .status(500)
+      .json({ message: "Error fetching coordinators", error: error.message });
+  }
+};
+const approveCoordinator = async (req, res) => {
+  const { uid } = req.body;
+
+  if (!uid) {
+    return res.status(400).json({ message: "Coordinator UID is required" });
+  }
+
+  try {
+    const coordinatorRef = ref(database, `coordinators/${uid}`);
+    const snapshot = await get(coordinatorRef);
+
+    if (!snapshot.exists()) {
+      return res.status(404).json({ message: "Coordinator not found" });
+    }
+
+    const coordinatorData = snapshot.val();
+
+    if (coordinatorData.status === "approved") {
+      return res
+        .status(400)
+        .json({ message: "Coordinator is already approved" });
+    }
+
+    // Update coordinator status to "approved"
+    await update(coordinatorRef, {
+      status: "approved",
+      approvedAt: new Date().toISOString(),
+    });
+
+    // Send approval notification email
+    const mailOptions = {
+      from: process.env.MAIL_USER,
+      to: coordinatorData.email,
+      subject: "Your Coordinator Account Has Been Approved!",
+      html: approvalEmailTemplate(coordinatorData.name),
+    };
+
+    await sendEmail(mailOptions);
+
+    return res
+      .status(200)
+      .json({ message: "Coordinator approved successfully" });
+  } catch (error) {
+    console.error("Error approving coordinator:", error);
+    return res
+      .status(500)
+      .json({ message: "Failed to approve coordinator", error: error.message });
+  }
+};
+const getPendingCoordinators = async (req, res) => {
+  try {
+    const coordinatorsRef = ref(database, "coordinators/");
+    const snapshot = await get(coordinatorsRef);
+
+    if (!snapshot.exists()) {
+      return res.status(404).json({ message: "No coordinators found." });
+    }
+
+    const coordinators = snapshot.val();
+    const pendingCoordinators = Object.keys(coordinators)
+      .filter((uid) => coordinators[uid].status === "pending")
+      .map((uid) => ({ uid, ...coordinators[uid] }));
+
+    res
+      .status(200)
+      .json({
+        message: "Pending coordinators fetched successfully.",
+        coordinators: pendingCoordinators,
+      });
+  } catch (error) {
+    console.error("Error fetching pending coordinators:", error);
+    res
+      .status(500)
+      .json({
+        message: "Failed to fetch pending coordinators.",
+        error: error.message,
+      });
+  }
+};
+const deleteCoordinator = async (req, res) => {
+  const { uid } = req.body;
+
+  if (!uid) {
+      return res.status(400).json({ message: "Coordinator UID is required" });
+  }
+
+  try {
+      const coordinatorRef = ref(database, `coordinators/${uid}`);
+      const snapshot = await get(coordinatorRef);
+
+      if (!snapshot.exists()) {
+          return res.status(404).json({ message: "Coordinator not found" });
+      }
+
+      await remove(coordinatorRef);
+
+      return res.status(200).json({ message: "Coordinator deleted successfully" });
+  } catch (error) {
+      console.error("Error deleting coordinator:", error);
+      return res.status(500).json({ message: "Failed to delete coordinator", error: error.message });
   }
 };
 
@@ -405,4 +624,9 @@ module.exports = {
   getAllSchools,
   getApprovedCoordinators,
   bulkUploadStudents,
+  updateUserProfile,
+  getAllCoordinator,
+  approveCoordinator,
+  getPendingCoordinators,
+  deleteCoordinator 
 };
