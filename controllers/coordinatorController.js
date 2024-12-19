@@ -27,6 +27,7 @@ const auth = getAuth(app);
 const { sendEmail } = require("../utils/sendEmail");
 const database = getDatabase(app);
 const { registrationEmailTemplate } = require("../utils/templateEmail");
+const { log } = require("console");
 require("dotenv").config();
 
 /**
@@ -78,58 +79,53 @@ function calculateEngagementBonus(practiceTestsAttempted) {
 /**
  * Coordinator Registration
  */
-// Email validation function
 
-/**
- * Coordinator Registration
- */
+
 const coordinatorRegister = async (req, res) => {
   const {
     email,
+    password,
     phoneNumber,
     whatsappNumber,
     country,
     state,
     city,
     name,
-    password,
   } = req.body;
 
-  // Input Validation
-  if (
-    !email ||
-    !password ||
-    !phoneNumber ||
-    !whatsappNumber ||
-    !country ||
-    !state ||
-    !city ||
-    !name
-  ) {
+  // Validate required fields
+  if (!email || !password || !phoneNumber || !whatsappNumber || !country || !state || !city || !name) {
     return res.status(400).json({ error: "All fields are required." });
   }
 
+  // Validate email and password
+  if (!validateEmail(email)) {
+    return res.status(400).json({ error: "Invalid email format." });
+  }
+  if (password.length < 8) {
+    return res.status(400).json({ error: "Password must be at least 8 characters." });
+  }
+
   try {
-    // Check if the user already exists in the database
-    const userRef = ref(database, "coordinators");
-    const snapshot = await get(child(userRef, email.replace(/[@.]/g, "_"))); // Replace invalid chars
+    // Create user in Firebase Auth
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const userId = userCredential.user.uid;
 
-    if (snapshot.exists()) {
-      return res.status(400).json({ error: "Coordinator already exists." });
-    }
+    // Hash the password for DB storage
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    const userId = email.replace(/[@.]/g, "_"); // Simple unique ID using email
-    const userData = {
+    // Store coordinator in Realtime Database
+    const userRef = ref(database, `coordinators/${userId}`);
+    await set(userRef, {
       email,
+      password: hashedPassword,
       phoneNumber,
       whatsappNumber,
       country,
       state,
       city,
       name,
-      password, // Store plain text password (not recommended for production, hash it!)
       role: "coordinator",
-      status: "pending",
       createdAt: new Date().toISOString(),
       category: "Starter Partner",
       totalStudents: 0,
@@ -137,38 +133,41 @@ const coordinatorRegister = async (req, res) => {
       totalIncentives: 0,
       bonusAmount: 0,
       totalEarnings: 0,
-    };
+      status: "pending"
+    });
 
-    // Add user data to Realtime Database
-    await set(ref(database, `coordinators/${userId}`), userData);
-
-    // Generate a JWT token for the coordinator
-    const token = jwt.sign(
-      { userId, email, role: "coordinator", status: "pending" },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: "30d" }
-    );
-
-    // Send registration confirmation email
+    // Send confirmation email (optional)
     const mailOptions = {
       from: process.env.MAIL_USER,
       to: email,
       subject: "Welcome to Global Innovator Olympiad!",
       html: registrationEmailTemplate(name),
     };
+    try {
+      await sendEmail(mailOptions);
+    } catch (emailError) {
+      console.error("Error sending registration email:", emailError);
+    }
 
-    await sendEmail(mailOptions);
+    // Generate JWT token
+    const token = jwt.sign({ userId, email, role: "coordinator", status: "pending" }, process.env.JWT_SECRET_KEY, {
+      expiresIn: "30d"
+    });
 
-    res.status(201).json({
-      message: "Coordinator registered successfully!",
+    return res.status(200).json({
+      message: "Coordinator registered successfully! Your account is pending admin approval.",
       token,
       data: { userId, email, role: "coordinator", status: "pending" },
     });
   } catch (error) {
-    console.error("Error registering coordinator:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error during registration:", error);
+    if (error.code === "auth/email-already-in-use") {
+      return res.status(400).json({ error: "Email is already in use." });
+    }
+    return res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 };
+
 
 /**
  * Coordinator Login
@@ -190,56 +189,41 @@ const coordinatorLogin = async (req, res) => {
   }
 
   try {
-    // Generate userId from email (replace invalid characters)
-    const userId = email.replace(/[@.]/g, "_");
+    // Sign in using Firebase Authentication
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const userId = userCredential.user.uid;
     const userRef = ref(database, `coordinators/${userId}`);
     const snapshot = await get(userRef);
 
-    // Check if user exists
     if (!snapshot.exists()) {
       return res.status(404).json({ error: "User not found." });
     }
 
-    const coordinatorData = snapshot.val();
-
-    // Compare provided password with hashed password
-    const isPasswordValid = await bcrypt.compare(
-      password,
-      coordinatorData.password
-    );
-    if (!isPasswordValid) {
-      return res.status(400).json({ error: "Incorrect password." });
-    }
-
-    // Check if coordinator is approved
-    if (coordinatorData.status !== "approved") {
-      return res
-        .status(403)
-        .json({ error: "Account pending approval by admin." });
-    }
-
-    // Generate JWT token
+    // Generate a JWT token
     const token = jwt.sign(
-      { userId, email, role: "coordinator", status: coordinatorData.status },
+      { userId, email, role: "coordinator" },
       process.env.JWT_SECRET_KEY,
       { expiresIn: "30d" }
     );
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "Login successful!",
       token,
-      data: {
-        userId,
-        email,
-        role: "coordinator",
-        status: coordinatorData.status,
-      },
+      data: { userId, email, role: "coordinator" },
     });
   } catch (error) {
     console.error("Error during login:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    if (error.code === "auth/wrong-password") {
+      return res.status(400).json({ error: "Incorrect password." });
+    }
+    if (error.code === "auth/user-not-found") {
+      return res.status(400).json({ error: "User not found." });
+    }
+    return res.status(500).json({ error: error.message || "Internal Server Error" });
   }
 };
+
+
 
 /**
  * Update Coordinator Profile
@@ -255,17 +239,19 @@ const isValidIFSC = (ifsc) => {
  * Update Coordinator Profile
  */
 const updateProfile = async (req, res) => {
-  // Only allow PUT requests
   if (req.method !== "PUT") {
     return res.status(405).json({ error: "Method Not Allowed. Use PUT." });
   }
 
   const { userId } = req.user;
-  const { bankName, accountNumber, ifsc, branch, upiId } = req.body;
+  const { bankName, accountNumber, ifsc, branch, upiId, accountHolderName } = req.body;
 
   // Validate required fields
-  if (!userId || !upiId || !ifsc) {
-    return res.status(400).json({ error: "upiId and ifsc are required." });
+  // Now require accountHolderName along with ifsc and upiId
+  if (!userId || !upiId || !ifsc || !accountHolderName || !accountNumber) {
+    return res.status(400).json({
+      error: "upiId, ifsc, accountHolderName, and accountNumber are required.",
+    });
   }
 
   // Validate IFSC code format
@@ -289,9 +275,11 @@ const updateProfile = async (req, res) => {
       accountNumber: accountNumber || "",
       ifsc: ifsc || "",
       branch: fetchedBranch || "",
+      accountHolderName: accountHolderName || "", // store account holder name
       updatedAt: new Date().toISOString(),
     });
 
+    // Optionally, you can return the updated data. For now, just a success message.
     res.status(200).json({ message: "Profile updated successfully!" });
   } catch (error) {
     console.error(
@@ -332,13 +320,40 @@ const getProfile = async (req, res) => {
 /**
  * Bulk Upload Students
  */
+
+async function saveQuizMarks({ user, body }) {
+  // Dummy Implementation for demonstration
+  return { message: "Quiz marks saved." };
+}
+
+// Mock `updateTotalStudents` function
+const updateTotalStudents = async (coordinatorId, count) => {
+  const coordinatorRef = `coordinators/${coordinatorId}`;
+  const coordinatorData = await getData(coordinatorRef); // Assume `getData` is a helper for fetching Firebase data
+  const totalStudents = (coordinatorData?.totalStudents || 0) + count;
+
+  await saveData(coordinatorRef, { ...coordinatorData, totalStudents });
+};
+
+// Mock `saveData` and `getData` for Firebase
+const saveData = async (path, data) => {
+  // Implement Firebase saving logic
+  await set(path, data)
+
+};
+
+
+
+// Bulk upload function
+
+
 const bulkUploadStudents = async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded." });
   }
 
   try {
-    console.log("Processing file:", req.file.path);
+
 
     // Read uploaded Excel file
     const workbook = xlsx.readFile(req.file.path);
@@ -455,10 +470,7 @@ const bulkUploadStudents = async (req, res) => {
                 type: "mock",
               },
             });
-            console.log(
-              `Mock test processed for UID: ${uid}`,
-              mockResult.message
-            );
+          
           } catch (error) {
             console.error(
               `Error saving mock test marks for UID: ${uid}:`,
@@ -479,10 +491,7 @@ const bulkUploadStudents = async (req, res) => {
                 type: "live",
               },
             });
-            console.log(
-              `Live test processed for UID: ${uid}`,
-              liveResult.message
-            );
+           
           } catch (error) {
             console.error(
               `Error saving live test marks for UID: ${uid}:`,
@@ -548,15 +557,21 @@ const bulkUploadStudents = async (req, res) => {
   }
 };
 
+
+
+
+
+
 /**
  * Get Students Added by Coordinator
  */
 const getStudentsByCoordinator = async (req, res) => {
   try {
-    const { userId } = req.user;
+    const { userId } = req.user; // Must be set by the authenticate middleware
     if (!userId) {
       return res.status(400).json({ message: "Coordinator ID is required." });
     }
+
     const dbRef = ref(database, "gio-students");
     const studentsSnapshot = await get(dbRef);
 
@@ -565,25 +580,26 @@ const getStudentsByCoordinator = async (req, res) => {
     }
 
     const allStudents = studentsSnapshot.val();
+  
+    
     const studentsByCoordinator = Object.keys(allStudents)
       .filter((key) => allStudents[key].addedBy === userId)
       .reduce((acc, key) => {
         acc[key] = allStudents[key];
         return acc;
       }, {});
+     
+
+      
 
     if (Object.keys(studentsByCoordinator).length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No students found for this coordinator." });
+      return res.status(404).json({ message: "No students found for this coordinator." });
     }
 
-    res.status(200).json({ students: studentsByCoordinator });
+    return res.status(200).json({ students: studentsByCoordinator });
   } catch (error) {
     console.error("Error fetching students by coordinator:", error);
-    res
-      .status(500)
-      .json({ message: "Error fetching students", error: error.message });
+    return res.status(500).json({ message: "Error fetching students", error: error.message });
   }
 };
 
@@ -593,7 +609,7 @@ const getStudentsByCoordinator = async (req, res) => {
  */
 const calculateIncentives = async (req, res) => {
   const { userId } = req.user;
-  console.log("userId: ", userId);
+
 
   try {
     // Get coordinator info
