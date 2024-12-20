@@ -10,7 +10,8 @@ const { v4: uuidv4 } = require("uuid");
 const xlsx = require("xlsx");
 const fs = require("fs");
 require("dotenv").config();
-
+const { sendEmail } = require("../utils/sendEmail");
+const { approvalEmailTemplate } = require("../utils/templateEmail")
 // Admin Login
 const adminLogin = async (req, res) => {
   const { email, password } = req.body;
@@ -511,6 +512,7 @@ const getAllCoordinator = async (req, res) => {
       .json({ message: "Error fetching coordinators", error: error.message });
   }
 };
+// adminController.js (approveCoordinator function)
 const approveCoordinator = async (req, res) => {
   const { uid } = req.body;
 
@@ -534,13 +536,11 @@ const approveCoordinator = async (req, res) => {
         .json({ message: "Coordinator is already approved" });
     }
 
-    // Update coordinator status to "approved"
     await update(coordinatorRef, {
       status: "approved",
       approvedAt: new Date().toISOString(),
     });
 
-    // Send approval notification email
     const mailOptions = {
       from: process.env.MAIL_USER,
       to: coordinatorData.email,
@@ -550,9 +550,7 @@ const approveCoordinator = async (req, res) => {
 
     await sendEmail(mailOptions);
 
-    return res
-      .status(200)
-      .json({ message: "Coordinator approved successfully" });
+    return res.status(200).json({ message: "Coordinator approved successfully" });
   } catch (error) {
     console.error("Error approving coordinator:", error);
     return res
@@ -574,16 +572,20 @@ const getPendingCoordinators = async (req, res) => {
       .filter((uid) => coordinators[uid].status === "pending")
       .map((uid) => ({ uid, ...coordinators[uid] }));
 
-    res.status(200).json({
-      message: "Pending coordinators fetched successfully.",
-      coordinators: pendingCoordinators,
-    });
+    res
+      .status(200)
+      .json({
+        message: "Pending coordinators fetched successfully.",
+        coordinators: pendingCoordinators,
+      });
   } catch (error) {
     console.error("Error fetching pending coordinators:", error);
-    res.status(500).json({
-      message: "Failed to fetch pending coordinators.",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({
+        message: "Failed to fetch pending coordinators.",
+        error: error.message,
+      });
   }
 };
 const deleteCoordinator = async (req, res) => {
@@ -603,63 +605,207 @@ const deleteCoordinator = async (req, res) => {
 
     await remove(coordinatorRef);
 
-    return res
-      .status(200)
-      .json({ message: "Coordinator deleted successfully" });
+    return res.status(200).json({ message: "Coordinator deleted successfully" });
   } catch (error) {
     console.error("Error deleting coordinator:", error);
-    return res
-      .status(500)
-      .json({ message: "Failed to delete coordinator", error: error.message });
+    return res.status(500).json({ message: "Failed to delete coordinator", error: error.message });
   }
 };
-const updateOrDeleteSchool = async (req, res) => {
-  const { uid, deleteSchool } = req.body; // Extract UID and delete flag
-  const { schoolName, principalName, email } = req.body; // Details for updating
 
-  if (!uid) {
-    return res.status(400).json({ message: "School UID is required" });
+// This function assumes you have a middleware that sets req.user = { userId: ... } from the JWT
+// Get Coordinator Payment Details
+const getCoordinatorPaymentDetails = async (req, res) => {
+  const { userId } = req.query; // Using userId from query params
+
+  if (!userId) {
+    return res.status(400).json({ error: "User ID is required in query parameter." });
   }
 
   try {
-    const schoolRef = ref(database, `schools/${uid}`);
-    const snapshot = await get(schoolRef);
+    const userRef = ref(database, `coordinators/${userId}`);
+    const snapshot = await get(userRef);
 
     if (!snapshot.exists()) {
-      return res
-        .status(404)
-        .json({ message: "School not found in the database." });
+      return res.status(404).json({ error: "Coordinator not found." });
     }
 
-    // Handle School Deletion
-    if (deleteSchool) {
-      await remove(schoolRef); // Deletes the school record
-      return res
-        .status(200)
-        .json({ message: "School profile deleted successfully." });
-    }
-
-    // Handle School Update
-    const updatedData = {
-      schoolName: schoolName || snapshot.val().schoolName,
-      principalName: principalName || snapshot.val().principalName,
-      email: email || snapshot.val().email,
+    const data = snapshot.val();
+    const paymentDetails = {
+      bankName: data.bankName || "",
+      accountNumber: data.accountNumber || "",
+      ifsc: data.ifsc || "",
+      branch: data.branch || "",
+      upiId: data.upiId || "",
+      accountHolderName: data.accountHolderName || "",
     };
 
-    await update(schoolRef, updatedData);
+    return res.status(200).json({ paymentDetails });
+  } catch (error) {
+    console.error("Error fetching payment details:", error);
+    return res.status(500).json({ error: "Failed to fetch payment details." });
+  }
+};
+// Bulk upload coordinator function
+const bulkUploadCoordinators = async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ message: "No file uploaded." });
+  }
 
-    return res.status(200).json({
-      message: "School details updated successfully.",
-      school: updatedData,
+  try {
+    console.log("Processing file:", req.file.path);
+    // Read uploaded Excel file
+    const workbook = xlsx.readFile(req.file.path);
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+
+    // Convert sheet data to JSON
+    const coordinators = xlsx.utils.sheet_to_json(sheet);
+
+    let failedEntries = [];
+    let successCount = 0;
+
+    // Iterate through each coordinator and process
+    for (const [index, coordinator] of coordinators.entries()) {
+      try {
+        // Validate required fields
+        if (
+          !coordinator.email ||
+          !coordinator.password ||
+          !coordinator.phoneNumber ||
+          !coordinator.whatsappNumber ||
+          !coordinator.country ||
+          !coordinator.state ||
+          !coordinator.city ||
+          !coordinator.name ||
+          !coordinator.category
+        ) {
+          failedEntries.push({
+            coordinator,
+            reason: "Missing required fields",
+            row: index + 2,
+          });
+          continue;
+        }
+
+        // Hash the password before saving
+        const hashedPassword = await bcrypt.hash(coordinator.password, 10); // Hash with salt rounds
+
+        // Generate a unique ID for the coordinator
+        const userId = uuidv4();
+
+        // Map categories to the correct details
+        const categoryDetails = {
+          "Starter Partner": { min: 1, max: 100, perStudentShare: 75 },
+          "Bronze Partner": { min: 101, max: 200, perStudentShare: 85 },
+          "Silver Partner": { min: 201, max: 300, perStudentShare: 95 },
+          "Gold Partner": { min: 301, max: 400, perStudentShare: 110 },
+          "Platinum Partner": { min: 401, max: Infinity, perStudentShare: 125 },
+        };
+
+        const selectedCategory = categoryDetails[coordinator.category];
+        if (!selectedCategory) {
+          failedEntries.push({
+            coordinator,
+            reason: `Invalid category "${coordinator.category}"`,
+            row: index + 2,
+          });
+          continue;
+        }
+
+        // Prepare coordinator data
+        const coordinatorData = {
+          userId,
+          email: coordinator.email,
+          password: hashedPassword,
+          phoneNumber: coordinator.phoneNumber,
+          whatsappNumber: coordinator.whatsappNumber,
+          country: coordinator.country,
+          state: coordinator.state,
+          city: coordinator.city,
+          name: coordinator.name,
+          role: "coordinator",
+          createdAt: new Date().toISOString(),
+          category: coordinator.category,
+          min: selectedCategory.min,
+          max: selectedCategory.max,
+          perStudentShare: selectedCategory.perStudentShare,
+          totalStudents: 0, // Set default to 0
+          totalPaidStudents: 0,
+          totalIncentives: 0,
+          bonusAmount: 0,
+          totalEarnings: 0,
+          status: "approved", // Automatically set to approved
+        };
+        console.log("hi juned");
+
+        console.log(coordinatorData)
+        // Save the coordinator data to Firebase
+        const coordinatorRef = ref(database, `coordinators/${userId}`);
+        await set(coordinatorRef, coordinatorData);
+
+        successCount++;
+      } catch (error) {
+        console.error(`Error processing coordinator at row ${index + 2}:`, error.message);
+        failedEntries.push({
+          coordinator,
+          reason: error.message,
+          row: index + 2,
+        });
+      }
+    }
+
+    // Remove the uploaded file after processing
+    try {
+      await fs.unlink(req.file.path);
+      console.log("File successfully deleted");
+    } catch (err) {
+      console.error("Error deleting file:", err.message);
+    }
+
+    // Return the result
+    res.status(200).json({
+      message: "Bulk upload of coordinators completed.",
+      successCount,
+      failedCount: failedEntries.length,
+      failedEntries,
     });
   } catch (error) {
-    console.error("Error in school update/delete:", error.message);
-    return res.status(500).json({
-      message: "Failed to update/delete school.",
+    console.error("Error in bulk upload:", error.message);
+    res.status(500).json({
+      message: "Bulk upload failed.",
       error: error.message,
     });
   }
 };
+
+
+const getRequestCallbacks = async (req, res) => {
+  try {
+    // Reference the "RequestCallback" node in the Firebase database
+    const callbackRef = ref(database, "RequestCallback/");
+    const snapshot = await get(callbackRef);
+
+    if (snapshot.exists()) {
+      // Convert snapshot data into an array of request objects
+      const requestCallbacks = Object.keys(snapshot.val()).map((key) => ({
+        id: key, // Unique ID for each request callback
+        ...snapshot.val()[key], // Include all nested data
+      }));
+
+      return res.status(200).json({
+        message: "Request callbacks retrieved successfully",
+        requestCallbacks,
+      });
+    } else {
+      return res.status(404).json({ message: "No request callbacks found." });
+    }
+  } catch (error) {
+    console.error("Error retrieving request callbacks:", error);
+    return res.status(500).json({ error: "Failed to retrieve request callbacks." });
+  }
+};
+
+
 
 module.exports = {
   adminLogin,
@@ -676,5 +822,8 @@ module.exports = {
   approveCoordinator,
   getPendingCoordinators,
   deleteCoordinator,
-  updateOrDeleteSchool,
+  getCoordinatorPaymentDetails,
+  bulkUploadCoordinators,
+  getRequestCallbacks
+
 };

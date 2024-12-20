@@ -16,7 +16,9 @@ const {
   approveCoordinator,
   getPendingCoordinators,
   deleteCoordinator,
-  updateOrDeleteSchool,
+  getCoordinatorPaymentDetails,
+  bulkUploadCoordinators,
+  getRequestCallbacks,
 } = require("../controllers/admiController");
 const authenticateAdmin = require("../middleware/authAdmin");
 
@@ -47,11 +49,24 @@ router.post(
 );
 // Update student details
 router.post("/adminreq/students", authenticateAdmin, updateUserProfile);
-router.post("/schools/update-or-delete", updateOrDeleteSchool);
+
 // Get all coordinators route
 router.get("/coordinators", authenticateAdmin, getAllCoordinator);
 router.post("/coordinators/approve", authenticateAdmin, approveCoordinator);
 router.delete("/coordinators/delete", authenticateAdmin, deleteCoordinator);
 router.get("/coordinators/pending", getPendingCoordinators);
 router.get("/coordinators/approved", getApprovedCoordinators);
+router.get(
+  "/coordinators/payment-details",
+  authenticateAdmin,
+  getCoordinatorPaymentDetails
+);
+router.post(
+  "/coordinator/bulk-upload",
+  upload.single("file"),
+  bulkUploadCoordinators
+);
+
+router.get("/request-callbacks", authenticateAdmin, getRequestCallbacks);
+
 module.exports = router;
